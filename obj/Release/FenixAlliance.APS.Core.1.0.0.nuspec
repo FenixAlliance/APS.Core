@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>FenixAlliance.APS.Core</id>
+    <version>1.0.0</version>
+    <authors>Fenix Alliance Group</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectUrl>https://github.com/FenixAlliance/ABS.SDK</projectUrl>
+    <iconUrl>https://fenixalliance.com.co/images/FenixAlliance/AppIcon/apple-icon-120x120.png</iconUrl>
+    <description>Alliance Passport Services Module C# Library (.Net 5.0)</description>
+    <copyright>© 2009 - 2020 Fenix Alliance Inc. All rights reserved.</copyright>
+    <repository url="https://github.com/FenixAlliance/ABS.SDK" />
+    <dependencies>
+      <group targetFramework="net5.0">
+        <dependency id="FenixAlliance.ABM.Hub" version="1.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Authentication" version="2.2.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Authentication.AzureAD.UI" version="3.1.9" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Authentication.AzureADB2C.UI" version="3.1.9" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Authentication.JwtBearer" version="3.1.9" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.AspNetCore.Authentication.OpenIdConnect" version="3.1.9" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Hosting" version="3.1.9" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Graph" version="3.17.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.IdentityModel.Tokens" version="6.8.0" exclude="Build,Analyzers" />
+        <dependency id="reCAPTCHA.AspNetCore" version="3.0.10" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="C:\Code\FAGroup\FenixAlliance.APS\FenixAlliance.APS.Core\bin\Release\net5.0\es\FenixAlliance.APS.Core.resources.dll" target="lib\net5.0\es\FenixAlliance.APS.Core.resources.dll" />
+    <file src="C:\Code\FAGroup\FenixAlliance.APS\FenixAlliance.APS.Core\bin\Release\net5.0\FenixAlliance.APS.Core.Views.dll" target="lib\net5.0\FenixAlliance.APS.Core.Views.dll" />
+    <file src="C:\Code\FAGroup\FenixAlliance.APS\FenixAlliance.APS.Core\bin\Release\net5.0\FenixAlliance.APS.Core.dll" target="lib\net5.0\FenixAlliance.APS.Core.dll" />
+  </files>
+</package>
