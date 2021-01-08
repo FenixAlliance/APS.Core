@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace FenixAlliance.Data.Access.Helpers.AADB2C
+namespace FenixAlliance.APS.Core.Models
 {
     public partial class OpenIdConfigurationResponse
     {

@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using FenixAlliance.ABM.Data.Access.Interfaces.DataHelpers;
+using FenixAlliance.APS.Core.Models;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Newtonsoft.Json;
 

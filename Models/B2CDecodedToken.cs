@@ -4,7 +4,7 @@ using System.Globalization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace FenixAlliance.Data.Access.Helpers.AADB2C
+namespace FenixAlliance.APS.Core.Models
 {
     public partial class B2CDecodedToken
     {

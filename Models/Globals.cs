@@ -1,4 +1,4 @@
-﻿namespace FenixAlliance.Data.Access.Helpers.AADB2C
+﻿namespace FenixAlliance.APS.Core.Models
 {
     public static class Globals
     {

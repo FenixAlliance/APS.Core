@@ -1,4 +1,4 @@
-﻿namespace Microsoft.AspNetCore.Authentication
+﻿namespace FenixAlliance.APS.Core.Models
 {
     public class AADB2COptions
     {

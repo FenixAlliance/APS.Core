@@ -24,23 +24,21 @@ namespace FenixAlliance.Data.Access.Helpers
 {
     public class APIHelpers
     {
-        public static async Task<APIResponse> BindAPIBaseResponse(ABMContext _context, HttpContext _httpcontext, HttpRequest _request, AccountUsersHelpers AccountTools, ClaimsPrincipal _user, string TenantID = "", List<string> RequiredPermissions = null, List<string> RequiredRoles = null, bool EnforceBusinessResponse = false)
+        public static async Task<APIResponse> BindAPIBaseResponse(ABMContext _context, HttpContext _httpContext, HttpRequest _request, AccountUsersHelpers AccountTools, ClaimsPrincipal _user, string TenantID = "", List<string> RequiredPermissions = null, List<string> RequiredRoles = null, bool EnforceBusinessResponse = false)
         {
             Business Business = null;
-            var AllianceIDHolder = new AllianceIDHolder();
-            var EnrollmentID = string.Empty;
-            var ApplicationID = string.Empty;
-            var BearerToken = string.Empty;
-            var HolderID = string.Empty;
-            var Settings = _context.Settings.Where(c => c.SettingsPK == "General").FirstOrDefault();
+            AllianceIDHolder AllianceIDHolder;
+            string EnrollmentID;
+            string HolderID;
 
-           var ExchangeRates = JsonConvert.DeserializeObject<CurrencyExchangeRates>(Settings.OpenCurrencyExchangeRates );
+            var Settings = await _context.Settings.FirstAsync(c => c.SettingsPK == "General");
+            var ExchangeRates = JsonConvert.DeserializeObject<CurrencyExchangeRates>(Settings.OpenCurrencyExchangeRates );
 
             var Response = new APIResponse()
             {
                 Status = new ResponseStatus()
                 {
-                    CorrelationID = Activity.Current?.Id ?? _httpcontext.TraceIdentifier
+                    CorrelationID = Activity.Current?.Id ?? _httpContext.TraceIdentifier
                 }
             };
 
@@ -48,12 +46,12 @@ namespace FenixAlliance.Data.Access.Helpers
             {
                 if (_user.Identity.IsAuthenticated)
                 {
-                    // If the current request comes fron an authenticated user.
+                    // If the current request comes from an authenticated user.
                     HolderID = AccountTools.GetActiveDirectoryGUID(_user);
                 }
                 else
                 {
-                    // If accesing data on behalf of certain user or customer by certain Application.
+                    // If accessing data on behalf of certain user or customer by certain Application.
                     if (AccountOAuthHelpers.ExtractAuthType(_request).ToUpperInvariant() == "Bearer".ToUpperInvariant())
                     {
                         try
@@ -65,7 +63,8 @@ namespace FenixAlliance.Data.Access.Helpers
 
                             var AuthHeader = _request.Headers.FirstOrDefault(x => x.Key.ToLowerInvariant() == "authorization").Value.FirstOrDefault();
 
-                            if (AuthHeader.Split(' ')[0].ToLowerInvariant() == "bearer")
+                            string BearerToken = "";
+                            if (AuthHeader != null && AuthHeader.Split(' ')[0].ToLowerInvariant() == "bearer")
                             {
                                 BearerToken = AuthHeader.Split(' ')[1];
                             }
@@ -88,7 +87,7 @@ namespace FenixAlliance.Data.Access.Helpers
 
                             if (SecretSet == null)
                             {
-                                throw new System.InvalidOperationException("Something went wrong retrieving application client. Decryption went wrong.");
+                                throw new InvalidOperationException("Something went wrong retrieving application client. Decryption went wrong.");
                             }
 
                             // Verify signature
@@ -98,19 +97,19 @@ namespace FenixAlliance.Data.Access.Helpers
                                 var PrivateRSAKeyParameters = rsa.ExportParameters(false);
                                 if (!SecurityHelpers.VerifyPayload(Payload, TokenSignature, PrivateRSAKeyParameters))
                                 {
-                                    throw new System.InvalidOperationException("Signature verification went wrong.");
+                                    throw new InvalidOperationException("Signature verification went wrong.");
                                 }
                             }
 
 
-                            ApplicationID = Payload.cid;
+                            var ApplicationID = Payload.cid;
                             EnrollmentID = Payload.sub;
 
                             if (!String.IsNullOrEmpty(TenantID))
                             {
                                 if (TenantID != Payload.act)
                                 {
-                                    throw new System.InvalidOperationException($"Can't use this token for Business Tenant: {TenantID}.");
+                                    throw new InvalidOperationException($"Can't use this token for Business Tenant: {TenantID}.");
                                 }
                             }
 
@@ -131,7 +130,7 @@ namespace FenixAlliance.Data.Access.Helpers
                                 {
                                     ID = "E05"
                                 };
-                                throw new System.InvalidOperationException("Requested Business Profile Record does not exists.");
+                                throw new InvalidOperationException("Requested Business Profile Record does not exists.");
                             }
 
                             // TODO: Check that applicationID exists and is equal to AppSecret.BusinessApplication.ID
@@ -146,7 +145,7 @@ namespace FenixAlliance.Data.Access.Helpers
                                     ID = "E05",
                                     Description = "Cannot validate client's identity. Decryption went wrong."
                                 };
-                                throw new System.InvalidOperationException("Cannot validate client's identity. Decryption went wrong.");
+                                throw new InvalidOperationException("Cannot validate client's identity. Decryption went wrong.");
 
                             }
 
@@ -174,7 +173,7 @@ namespace FenixAlliance.Data.Access.Helpers
                     }
                     else
                     {
-                        throw new System.InvalidOperationException("Identity verification went wrong.");
+                        throw new InvalidOperationException("Identity verification went wrong.");
                     }
                 }
 

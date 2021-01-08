@@ -6,9 +6,9 @@ namespace FenixAlliance.Data.Access.Helpers
     public static class MongoHelpers
     {
 
-        public static IMongoCollection<BsonDocument> GetMongoLocalClient()
+        public static IMongoCollection<BsonDocument> GetMongodbClient()
         {
-            // TODO: Ensure mongo is running.
+            // TODO: Ensure mongodb is running.
             var client = new MongoClient();
             var db = client.GetDatabase("AllianceBusinessSuite");
             var AllianceBusinessSuites = db.GetCollection<BsonDocument>("AllianceBusinessSuites");

@@ -8,6 +8,7 @@ using FenixAlliance.ABM.Models.Global.Carts.CartScopes;
 using FenixAlliance.ABM.Models.Global.Wallets.WalletAccountScopes;
 using FenixAlliance.ABM.Models.Holders;
 using FenixAlliance.ABM.Models.Social.SocialProfiles.Scopes;
+using FenixAlliance.APS.Core.Models;
 using FenixAlliance.Data.Access.Helpers.AADB2C;
 using Microsoft.EntityFrameworkCore;
 

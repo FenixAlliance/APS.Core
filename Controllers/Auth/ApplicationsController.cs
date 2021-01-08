@@ -42,7 +42,7 @@ namespace FenixAlliance.APS.Core.Controllers.Auth
         [Produces("application/json")]
         public async Task<ActionResult> GetApplication(string AppID)
         {
-
+            await Task.Delay(1000);
             return Ok();
         }
 
@@ -50,7 +50,7 @@ namespace FenixAlliance.APS.Core.Controllers.Auth
         [Produces("application/json")]
         public async Task<ActionResult> GetRequiredPermissions(string AppID)
         {
-
+            await Task.Delay(1000);
             return Ok();
         }
 
@@ -58,7 +58,7 @@ namespace FenixAlliance.APS.Core.Controllers.Auth
         [HttpGet("{AppID}/GrantedPermissions")]
         public async Task<ActionResult> GetGrantedTenantPermissions(string AppID, string TenantID)
         {
-
+            await Task.Delay(1000);
             return Ok();
         }
 
@@ -66,7 +66,7 @@ namespace FenixAlliance.APS.Core.Controllers.Auth
         [HttpGet("{AppID}/GrantedRoles")]
         public async Task<ActionResult> GetGrantedTenantRoles(string AppID, string TenantID)
         {
-
+            await Task.Delay(1000);
             return Ok();
         }
 
@@ -76,7 +76,7 @@ namespace FenixAlliance.APS.Core.Controllers.Auth
 
         public async Task<ActionResult> GetGrantedEnrollmentPermissions(string AppID, string SecurityRoleID, string EnrollmentID)
         {
-
+            await Task.Delay(1000);
             return Ok();
         }
 

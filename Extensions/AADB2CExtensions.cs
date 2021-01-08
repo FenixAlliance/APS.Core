@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using FenixAlliance.APS.Core.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;

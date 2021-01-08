@@ -16,21 +16,20 @@ namespace FenixAlliance.Data.Access.Helpers
 {
     public class StoreHelpers : IStoreHelpers
     {
-        private readonly ABMContext _context;
-        private AccountUsersHelpers AccountTools { get; set; }
-        private readonly BlobStorageDataAccessClient DataTools;
+        private readonly ABMContext DataContext;
+        private readonly BlobStorageDataAccessClient BlobStorageDataAccessClient;
+
         public StoreHelpers(ABMContext context)
         {
-            _context = context;
-            AccountTools = new AccountUsersHelpers(context);
-            DataTools = new BlobStorageDataAccessClient();
+            DataContext = context;
+            BlobStorageDataAccessClient = new BlobStorageDataAccessClient();
         }
         public async Task<Item> CalculateItemPricesAsync(Item Item)
         {
 
             if (String.IsNullOrEmpty(Item.OpenCurrencyExchangeRates))
             {
-                Item.OpenCurrencyExchangeRates = (await _context.Settings.AsNoTracking().FirstOrDefaultAsync(c => c.SettingsPK == "General")).OpenCurrencyExchangeRates;
+                Item.OpenCurrencyExchangeRates = (await DataContext.Settings.AsNoTracking().FirstOrDefaultAsync(c => c.SettingsPK == "General")).OpenCurrencyExchangeRates;
             }
 
             var ForexRates = JsonConvert.DeserializeObject<CurrencyExchangeRates>(Item.OpenCurrencyExchangeRates);
@@ -59,7 +58,7 @@ namespace FenixAlliance.Data.Access.Helpers
                 {
                     if (Item.IsDeadlineDiscount)
                     {
-                        // Check from and due dates to aplly discount. if not in range, apply regular price
+                        // Check from and due dates to apply discount. if not in range, apply regular price
                         if (DateTime.Compare(DateTime.Now, Item.DeadlineDiscountDueDate) <= 0)
                         {
                             // Meets criteria for deadline discount
@@ -83,7 +82,7 @@ namespace FenixAlliance.Data.Access.Helpers
                     {
                         if (DateTime.Compare(DateTime.Now, Item.DeadlineDiscountDueDate) <= 0)
                         {
-                            // In Range for discount, get discount ammount and aplly it to regular price
+                            // In Range for discount, get discount amount and apply it to regular price
                             PriceAfterDiscounts = (RegularPrice - (RegularPrice * (Item.DiscountPercentage / 100)));
                         }
                         else
@@ -111,7 +110,7 @@ namespace FenixAlliance.Data.Access.Helpers
             // Init price after SellingMarginPolicy
             if (Item.ItemSellingMarginPolicyRecords == null)
             {
-                Item.ItemSellingMarginPolicyRecords = await _context.ItemSellingMarginPolicyRecord
+                Item.ItemSellingMarginPolicyRecords = await DataContext.ItemSellingMarginPolicyRecord
                     .AsNoTracking()
                     .Include(c => c.ItemSellingMarginPolicy)
                         .ThenInclude(c => c.Currency)
@@ -130,7 +129,7 @@ namespace FenixAlliance.Data.Access.Helpers
             // Init price after PricingRules
             if (Item.ItemPricingRuleRecords == null)
             {
-                Item.ItemPricingRuleRecords = await _context.ItemPricingRuleRecord
+                Item.ItemPricingRuleRecords = await DataContext.ItemPricingRuleRecord
                     .AsNoTracking()
                     .Include(c => c.ItemPricingRule)
                         .ThenInclude(c => c.Currency)
@@ -152,7 +151,7 @@ namespace FenixAlliance.Data.Access.Helpers
 
             if (Item.ItemTaxPolicyRecords == null)
             {
-                Item.ItemTaxPolicyRecords = await _context.ItemTaxPolicyRecord
+                Item.ItemTaxPolicyRecords = await DataContext.ItemTaxPolicyRecord
                     .AsNoTracking()
                     .Include(c => c.TaxPolicy)
                         .ThenInclude(c => c.Currency)
@@ -160,7 +159,7 @@ namespace FenixAlliance.Data.Access.Helpers
             }
             foreach (var TaxPolicyRecord in Item.ItemTaxPolicyRecords)
             {
-                // Apply Porcentual Tax
+                // Apply Tax Rate
                 TotalTaxes += (PriceBeforeTaxes * (TaxPolicyRecord.TaxPolicy.Percentage / 100));
                 // Get Tax Policy Exchange Rate for fixed costs
                 var TaxPolicyPolicyExchangeRate = ForexRates.Rates.FirstOrDefault(c => c.Key == TaxPolicyRecord.TaxPolicy.CurrencyID.Split('.')[0]);
@@ -173,7 +172,7 @@ namespace FenixAlliance.Data.Access.Helpers
             // Init shipping cost
             if (Item.ItemShippingPolicyRecords == null)
             {
-                Item.ItemShippingPolicyRecords = await _context.ItemShippingPolicyRecord
+                Item.ItemShippingPolicyRecords = await DataContext.ItemShippingPolicyRecord
                     .AsNoTracking()
                      .Include(c => c.ItemShippingPolicy)
                          .ThenInclude(c => c.Currency)
@@ -183,23 +182,23 @@ namespace FenixAlliance.Data.Access.Helpers
 
             foreach (var ShippingPolicyRecord in Item.ItemShippingPolicyRecords)
             {
-                // Apply Porcentual Shipping Cost
+                // Apply Shipping Cost
                 ShippingCost += (CostTaxIncluded * (ShippingPolicyRecord.ItemShippingPolicy.Percentage / 100));
                 // Get Shipping Policy Exchange Rate for fixed costs
                 var ShippingPolicyPolicyExchangeRate = ForexRates.Rates.FirstOrDefault(c => c.Key == ShippingPolicyRecord.ItemShippingPolicy.CurrencyID.Split('.')[0]);
                 ShippingCost += (ShippingPolicyRecord.ItemShippingPolicy.Value / ShippingPolicyPolicyExchangeRate.Value);
             }
 
-            ShippingTaxes += (ShippingCost * (19 / 100));
+            ShippingTaxes += (ShippingCost * (0.19));
             var TotalShippingCost = (ShippingCost + ShippingTaxes);
             var PriceAfterTaxes = (PriceBeforeTaxes + TotalShippingCost);
 
             // Calculate Payment Cost
             ePaycoCommission = (PriceAfterTaxes * (2.99 / 100)) + (7400 / COP_ConversionRate);
-            ePaycoCommissionTax = (ePaycoCommission * (19 / 100));
-            ePaycoReteICA = CostTaxIncluded * (2 / 100);
-            ePaycoReteIVA = TotalTaxes * (15.0 / 100);
-            ePaycoRenta = PriceAfterTaxes * (1.5 / 100);
+            ePaycoCommissionTax = (ePaycoCommission ) * (0.19);
+            ePaycoReteICA = CostTaxIncluded * (0.02);
+            ePaycoReteIVA = TotalTaxes * (0.15);
+            ePaycoRenta = PriceAfterTaxes * (0.015);
             var ePaycoMaxPaymentCost = ePaycoCommission + ePaycoCommissionTax + ePaycoReteICA + ePaycoReteIVA + ePaycoRenta;
 
             // Increase Taxes
@@ -227,30 +226,26 @@ namespace FenixAlliance.Data.Access.Helpers
         public async Task<bool> CreateSARUsageRecord(string CartID, string ItemID, string UsageRecordType)
         {
             // Adds SAR Usage data
-            CloudBlobContainer SAR_container = await DataTools.GetCloudBlobContainerAsync("data");
+            CloudBlobContainer SAR_container = await BlobStorageDataAccessClient.GetCloudBlobContainerAsync("data");
             BlobContainerPermissions SAR_container_permissions = await SAR_container.GetPermissionsAsync();
             SAR_container_permissions.PublicAccess = BlobContainerPublicAccessType.Container;
             await SAR_container.SetPermissionsAsync(SAR_container_permissions);
 
             var UsageAppendBlobReference = SAR_container.GetBlockBlobReference("usage/usage.csv");
             var csv = new StringBuilder();
-            var UsageRecord = $"{CartID},{ItemID},{DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")},{UsageRecordType}";
+            var UsageRecord = $"{CartID},{ItemID},{DateTime.UtcNow:yyyy-MM-ddTHH:mm:ssZ},{UsageRecordType}";
             csv.AppendLine(UsageRecord);
             try
             {
-                if (!String.IsNullOrEmpty(CartID) && !String.IsNullOrWhiteSpace(CartID) && !String.IsNullOrEmpty(ItemID) && !String.IsNullOrWhiteSpace(ItemID) && !String.IsNullOrEmpty(UsageRecordType) && !String.IsNullOrWhiteSpace(UsageRecordType))
+                if (!string.IsNullOrEmpty(CartID) && !string.IsNullOrWhiteSpace(CartID) && !string.IsNullOrEmpty(ItemID) && !string.IsNullOrWhiteSpace(ItemID) && !String.IsNullOrEmpty(UsageRecordType) && !String.IsNullOrWhiteSpace(UsageRecordType))
                 {
-                    using (MemoryStream stream = new MemoryStream())
-                    {
-                        await UsageAppendBlobReference.DownloadToStreamAsync(stream);
-                        using (StreamWriter sw = new StreamWriter(stream))
-                        {
-                            sw.Write(csv.ToString());
-                            sw.Flush();
-                            stream.Position = 0;
-                            await UsageAppendBlobReference.UploadFromStreamAsync(stream);
-                        }
-                    }
+                    await using var stream = new MemoryStream();
+                    await UsageAppendBlobReference.DownloadToStreamAsync(stream);
+                    await using var sw = new StreamWriter(stream);
+                    sw.Write(csv.ToString());
+                    sw.Flush();
+                    stream.Position = 0;
+                    await UsageAppendBlobReference.UploadFromStreamAsync(stream);
                 }
             }
             catch (Exception)
@@ -260,37 +255,32 @@ namespace FenixAlliance.Data.Access.Helpers
 
             return true;
         }
-        public async Task<bool> CreateCustomWeightSARUsageRecord(string CartID, string ItemID, string CustomWeignt)
+        public async Task<bool> CreateCustomWeightSARUsageRecord(string CartID, string ItemID, string CustomWeight)
         {
             // Adds SAR Usage data
-            CloudBlobContainer SAR_container = await DataTools.GetCloudBlobContainerAsync("data");
-            BlobContainerPermissions SAR_container_permissions = await SAR_container.GetPermissionsAsync();
+            var SAR_container = await BlobStorageDataAccessClient.GetCloudBlobContainerAsync("data");
+            var SAR_container_permissions = await SAR_container.GetPermissionsAsync();
             SAR_container_permissions.PublicAccess = BlobContainerPublicAccessType.Container;
             await SAR_container.SetPermissionsAsync(SAR_container_permissions);
 
             var UsageAppendBlobReference = SAR_container.GetBlockBlobReference("usage/usage.csv");
 
             var csv = new StringBuilder();
-            var UsageRecord = $"{CartID},{ItemID},{DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")},,{CustomWeignt}";
+            var UsageRecord = $"{CartID},{ItemID},{DateTime.UtcNow:yyyy-MM-ddTHH:mm:ssZ},,{CustomWeight}";
             csv.AppendLine(UsageRecord);
             try
             {
-                if (!String.IsNullOrEmpty(CartID) && !String.IsNullOrWhiteSpace(CartID)
-                    && !String.IsNullOrEmpty(ItemID) && !String.IsNullOrWhiteSpace(ItemID)
-                    && !String.IsNullOrEmpty(CustomWeignt) && !String.IsNullOrWhiteSpace(CustomWeignt))
+                if (!string.IsNullOrEmpty(CartID) && !string.IsNullOrWhiteSpace(CartID)
+                    && !string.IsNullOrEmpty(ItemID) && !string.IsNullOrWhiteSpace(ItemID)
+                    && !string.IsNullOrEmpty(CustomWeight) && !string.IsNullOrWhiteSpace(CustomWeight))
                 {
-
-                    using (MemoryStream stream = new MemoryStream())
-                    {
-                        await UsageAppendBlobReference.DownloadToStreamAsync(stream);
-                        using (StreamWriter sw = new StreamWriter(stream))
-                        {
-                            sw.Write(csv.ToString());
-                            sw.Flush();
-                            stream.Position = 0;
-                            await UsageAppendBlobReference.UploadFromStreamAsync(stream);
-                        }
-                    }
+                    await using var stream = new MemoryStream();
+                    await UsageAppendBlobReference.DownloadToStreamAsync(stream);
+                    await using var sw = new StreamWriter(stream);
+                    sw.Write(csv.ToString());
+                    sw.Flush();
+                    stream.Position = 0;
+                    await UsageAppendBlobReference.UploadFromStreamAsync(stream);
                 }
             }
             catch (Exception)

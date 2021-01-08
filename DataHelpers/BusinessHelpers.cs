@@ -21,6 +21,7 @@ namespace FenixAlliance.Data.Access.Helpers
         private AccountUsersHelpers AccountTools { get; set; }
         private BlobStorageDataAccessClient DataTools;
         private BusinessDataAccessClient BusinessDataAccessClient;
+
         public BusinessHelpers(ABMContext context, IConfiguration configuration = null, IHostEnvironment hostingEnvironment = null)
         {
             _context = context;

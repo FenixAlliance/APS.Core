@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using FenixAlliance.APS.Core.Models;
 using FenixAlliance.Models.DTOs.Authorization;
 using FenixAlliance.Models.DTOs.Components.ID;
 using FenixAlliance.Models.DTOs.Responses;

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using FenixAlliance.ABM.Data;
 using FenixAlliance.ABM.Data.Access.Interfaces.DataHelpers;
+using FenixAlliance.APS.Core.Models;
 using FenixAlliance.Data.Access.Helpers.AADB2C;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;

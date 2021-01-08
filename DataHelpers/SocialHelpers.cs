@@ -2,20 +2,22 @@
 using FenixAlliance.ABM.Data;
 using FenixAlliance.ABM.Data.Access.Interfaces.DataHelpers;
 using FenixAlliance.Data.Access.DataAccess;
+using FenixAlliance.Data.Access.Helpers;
 using Microsoft.EntityFrameworkCore;
 
-namespace FenixAlliance.Data.Access.Helpers
+namespace FenixAlliance.APS.Core.DataHelpers
 {
     public class SocialHelpers : ISocialHelpers
     {
-        private readonly ABMContext _context;
+        private readonly ABMContext DataContext;
         private AccountUsersHelpers AccountTools { get; set; }
         private readonly BlobStorageDataAccessClient DataTools;
-        public SocialHelpers(ABMContext context)
+
+        public SocialHelpers(ABMContext ABMContext)
         {
-            _context = context;
-            AccountTools = new AccountUsersHelpers(context);
+            DataContext = ABMContext;
             DataTools = new BlobStorageDataAccessClient();
+            AccountTools = new AccountUsersHelpers(DataContext);
         }
 
 
@@ -56,17 +58,17 @@ namespace FenixAlliance.Data.Access.Helpers
 
         public async Task<string> GetSocialProfileType(string SocialProfileID)
         {
-            if (await _context.AllianceIDHolderSocialProfile.AnyAsync(c => c.ID == SocialProfileID))
+            if (await DataContext.AllianceIDHolderSocialProfile.AnyAsync(c => c.ID == SocialProfileID))
             {
                 return "Holder";
             }
 
-            if (await _context.BusinessSocialProfile.AnyAsync(c => c.ID == SocialProfileID))
+            if (await DataContext.BusinessSocialProfile.AnyAsync(c => c.ID == SocialProfileID))
             {
                 return "Tenant";
             }
 
-            if (await _context.ContactSocialProfile.AnyAsync(c => c.ID == SocialProfileID))
+            if (await DataContext.ContactSocialProfile.AnyAsync(c => c.ID == SocialProfileID))
             {
                 return "Contact";
             }

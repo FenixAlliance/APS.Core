@@ -1,4 +1,4 @@
-﻿namespace FenixAlliance.Helpers.Auth
+﻿namespace FenixAlliance.APS.Core.Models
 {
     public class AADB2CConstants
     {

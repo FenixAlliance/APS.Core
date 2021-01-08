@@ -1,18 +1,15 @@
 ﻿@using System.Security.Claims
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.Extensions.Options
-@using System.Security.Principal
 @using Microsoft.AspNetCore.Mvc.Localization
-@using FenixAlliance
 @using FenixAlliance.APS.Core.Resources
+@using FenixAlliance.APS.Core.Models
 
 
-@inject IViewLocalizer Localizer
-@inject IHtmlLocalizer<SharedResources> SharedLocalizer
+@inject IHtmlLocalizer<SharedResources> __
+
 @{
-
     ViewData["Title"] = "Claims";
 }
+
 <h2>Claims</h2>
 <h4>Claims Present in the Claims Identity:</h4>
 <table class="table-hover claim-table">
@@ -20,12 +17,12 @@
         <th class="claim-type claim-data claim-head">Claim Type</th>
         <th class="claim-data claim-head">Claim Value</th>
     </tr>
-    @foreach (Claim claim in @User.Claims)
+    @foreach (Claim claim in User.Claims)
     {
-    <tr>
-        <td class="claim-type claim-data">@claim.Type</td>
-        <td class="claim-data">@claim.Value</td>
-    </tr>
+        <tr>
+            <td class="claim-type claim-data">@claim.Type</td>
+            <td class="claim-data">@claim.Value</td>
+        </tr>
     }
 </table>
 
