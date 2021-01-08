@@ -1,4 +1,5 @@
 ﻿using FenixAlliance.ABM.Data;
+using FenixAlliance.APS.Core.Models;
 using FenixAlliance.Data.Access.DataAccess;
 using FenixAlliance.Data.Access.Helpers;
 using Microsoft.AspNetCore.Authentication;
