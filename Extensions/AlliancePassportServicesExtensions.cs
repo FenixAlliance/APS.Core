@@ -1,21 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FenixAlliance.Options;
+﻿using FenixAlliance.Options;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.AzureAD.UI;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Authentication.AzureAD.UI;
-using Microsoft.AspNetCore.Identity;
 
-namespace FenixAlliance.Passport.Core
+namespace FenixAlliance.APS.Core.Extensions
 {
     public static class AlliancePassportServicesExtensions
     {
@@ -67,7 +60,6 @@ namespace FenixAlliance.Passport.Core
             #region GDPR
             if (Options.Functionalities.Gdpr.Enable)
             {
-
                 // Adds Cookies Consent for GDPR Compliance
                 services.Configure<CookiePolicyOptions>(options =>
                 {

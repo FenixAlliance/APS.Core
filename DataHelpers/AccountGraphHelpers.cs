@@ -57,7 +57,7 @@ namespace FenixAlliance.Data.Access.Helpers
         }
 
         /// <summary>
-        /// Asserts wether or not a specific Alliance ID Holder belongs to a particular Security Group.
+        /// Asserts if a specific Alliance ID Holder belongs to a particular Security Group.
         /// </summary>
         /// <param name="GUID">The Alliance ID GUID for the consulted holder.</param>
         /// <param name="ADGroupID">The Security group ID to validate against.</param>
@@ -70,7 +70,9 @@ namespace FenixAlliance.Data.Access.Helpers
             foreach (Value v in formatted.Value)
             {
                 if (v.Url.ToString().Contains(ADGroupID))
+                {
                     return true;
+                }
             }
             return false;
         }

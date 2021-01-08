@@ -1,17 +1,15 @@
 ﻿using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Json;
-using Newtonsoft.Json;
 using System.Threading.Tasks;
 using FenixAlliance.Models.DTOs.Authorization;
 using FenixAlliance.Models.DTOs.Components.ID;
 using FenixAlliance.Models.DTOs.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
+using Newtonsoft.Json;
 
 namespace FenixAlliance.Data.Access.Helpers.AADB2C
 {
@@ -39,7 +37,9 @@ namespace FenixAlliance.Data.Access.Helpers.AADB2C
 
             // Check 
             if (DecodedToken.Oid.ToString() != Holder.ID)
+            {
                 return null;
+            }
 
             return Holder;
         }
@@ -68,9 +68,11 @@ namespace FenixAlliance.Data.Access.Helpers.AADB2C
             var TPayload = JsonConvert.DeserializeObject<JsonWebTokenPayload>(SerializedJSONTokenPayload);
             var IsValidSignature = false;
 
-            var OpenIDEndpoints = new List<string>();
-            OpenIDEndpoints.Add("https://fenixallianceb2c.b2clogin.com/tfp/fenixallianceb2c.onmicrosoft.com/B2C_1_AllianceID/v2.0/.well-known/openid-configuration");
-            OpenIDEndpoints.Add("https://fenixallianceb2c.b2clogin.com/tfp/fenixallianceb2c.onmicrosoft.com/B2C_1_AndySignIn/v2.0/.well-known/openid-configuration");
+            var OpenIDEndpoints = new List<string>
+            {
+                "https://fenixallianceb2c.b2clogin.com/tfp/fenixallianceb2c.onmicrosoft.com/B2C_1_AllianceID/v2.0/.well-known/openid-configuration",
+                "https://fenixallianceb2c.b2clogin.com/tfp/fenixallianceb2c.onmicrosoft.com/B2C_1_AndySignIn/v2.0/.well-known/openid-configuration"
+            };
 
             foreach (var Endpoint in OpenIDEndpoints)
             {
@@ -94,7 +96,9 @@ namespace FenixAlliance.Data.Access.Helpers.AADB2C
 
             // If Signature is invalid, return null.
             if (!IsValidSignature)
+            {
                 return null;
+            }
 
             // Decode and return Token.
             return SerializedJSONToken;
@@ -107,7 +111,9 @@ namespace FenixAlliance.Data.Access.Helpers.AADB2C
             {
                 var AuthHeader = request.Headers.FirstOrDefault(x => x.Key.ToLowerInvariant() == "authorization").Value.FirstOrDefault();
                 if(AuthHeader.Split(' ')[0].ToLowerInvariant() == "bearer")
+                {
                     Token = AuthHeader.Split(' ')[1];
+                }
             }
             catch
             {

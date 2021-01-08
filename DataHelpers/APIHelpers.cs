@@ -1,25 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using FenixAlliance.Data.Access.Helpers.AADB2C;
-using FenixAlliance.Models.DTOs.Authorization;
-using FenixAlliance.Models.DTOs.Components.Businesses;
-using FenixAlliance.Models.DTOs.Responses;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Text.Json;
 using FenixAlliance.ABM.Data;
 using FenixAlliance.ABM.Models.Holders;
 using FenixAlliance.ABM.Models.Tenants;
 using FenixAlliance.ABM.SDK.Helpers;
-using Newtonsoft.Json;
+using FenixAlliance.Data.Access.Helpers.AADB2C;
+using FenixAlliance.Models.DTOs.Authorization;
+using FenixAlliance.Models.DTOs.Components.Businesses;
 using FenixAlliance.Models.DTOs.Components.Global.Currencies;
+using FenixAlliance.Models.DTOs.Responses;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace FenixAlliance.Data.Access.Helpers
 {
@@ -67,7 +66,9 @@ namespace FenixAlliance.Data.Access.Helpers
                             var AuthHeader = _request.Headers.FirstOrDefault(x => x.Key.ToLowerInvariant() == "authorization").Value.FirstOrDefault();
 
                             if (AuthHeader.Split(' ')[0].ToLowerInvariant() == "bearer")
+                            {
                                 BearerToken = AuthHeader.Split(' ')[1];
+                            }
 
                             var TokenComponents = BearerToken.Split('.');
                             var TokenHeader = TokenComponents[0];
@@ -86,7 +87,9 @@ namespace FenixAlliance.Data.Access.Helpers
                             var SecretSet = await _context.BusinessApplicationSecret.Include(c => c.BusinessApplication).ThenInclude(c => c.Business).FirstAsync(c => c.ID == Header.kid);
 
                             if (SecretSet == null)
+                            {
                                 throw new System.InvalidOperationException("Something went wrong retrieving application client. Decryption went wrong.");
+                            }
 
                             // Verify signature
                             using (var rsa = new RSACryptoServiceProvider())
@@ -94,7 +97,9 @@ namespace FenixAlliance.Data.Access.Helpers
                                 rsa.FromXmlString(StringHelpers.Base64Decode(SecretSet.SigningPublicKey));
                                 var PrivateRSAKeyParameters = rsa.ExportParameters(false);
                                 if (!SecurityHelpers.VerifyPayload(Payload, TokenSignature, PrivateRSAKeyParameters))
+                                {
                                     throw new System.InvalidOperationException("Signature verification went wrong.");
+                                }
                             }
 
 
@@ -122,8 +127,10 @@ namespace FenixAlliance.Data.Access.Helpers
                                 Response.Holder = null;
                                 Response.Application = null;
                                 Response.Status.Success = false;
-                                Response.Status.Error = new Error();
-                                Response.Status.Error.ID = "E05";
+                                Response.Status.Error = new Error
+                                {
+                                    ID = "E05"
+                                };
                                 throw new System.InvalidOperationException("Requested Business Profile Record does not exists.");
                             }
 
@@ -200,7 +207,9 @@ namespace FenixAlliance.Data.Access.Helpers
                 .FirstOrDefaultAsync(c => c.GUID == HolderID);
 
                 if (String.IsNullOrEmpty(TenantID))
+                {
                     TenantID = AllianceIDHolder.SelectedBusinessID;
+                }
 
                 if (!String.IsNullOrEmpty(TenantID))
                 {

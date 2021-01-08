@@ -1,13 +1,13 @@
-﻿using FenixAlliance.Data.Access.Helpers;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FenixAlliance.ABM.Data;
 using FenixAlliance.ABM.Data.Access.Interfaces.DataAccess;
 using FenixAlliance.ABM.Models.Logistics.Stock.Item;
+using FenixAlliance.Data.Access.Helpers;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
 namespace FenixAlliance.Data.Access.DataAccess
 {

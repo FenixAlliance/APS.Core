@@ -345,37 +345,56 @@ namespace FenixAlliance.Data.Access.Helpers
                                 Response.IdentityProvider = identityProvider;
 
                                 if (Response.AllianceIDHolderCart == null)
+                                {
                                     Response.AllianceIDHolderCart = new AllianceIDHolderCart() { CurrencyID = "USD.USA" };
+                                }
 
                                 if (String.IsNullOrEmpty(Response.CountryID))
+                                {
                                     Response.CountryID = "USA";
+                                }
 
                                 if (Response.SocialProfile == null)
+                                {
                                     Response.SocialProfile = new AllianceIDHolderSocialProfile();
+                                }
 
                                 if (Response.SelectedBusiness != null)
                                 {
                                     if (Response.SelectedBusiness.BusinessCart == null)
+                                    {
                                         Response.SelectedBusiness.BusinessCart = new BusinessCart() { CurrencyID = "USD.USA" };
+                                    }
 
                                     if (Response.SelectedBusiness.Country == null)
+                                    {
                                         Response.SelectedBusiness.CountryID = "USA";
+                                    }
 
                                     if (Response.SelectedBusiness.BusinessWallet == null)
+                                    {
                                         Response.SelectedBusiness.BusinessWallet = new BusinessWallet() { CountryID = "USA" };
+                                    }
 
                                     if (Response.SelectedBusiness.BusinessSocialProfile == null)
+                                    {
                                         Response.SelectedBusiness.BusinessSocialProfile = new BusinessSocialProfile();
+                                    }
 
                                     if (String.IsNullOrEmpty(Response.SelectedBusiness.BusinessIndustryID))
+                                    {
                                         Response.SelectedBusiness.BusinessIndustryID = "Default";
+                                    }
 
                                     if (String.IsNullOrEmpty(Response.SelectedBusiness.ID))
+                                    {
                                         Response.SelectedBusiness.ID = "1 - 9 Employees";
-
+                                    }
 
                                     if (String.IsNullOrEmpty(Response.SelectedBusiness.ID))
+                                    {
                                         Response.SelectedBusiness.ID = "Default";
+                                    }
 
                                     //TOOD: Add some non query security verifications for holder auth over current business
                                 }
@@ -405,7 +424,9 @@ namespace FenixAlliance.Data.Access.Helpers
                 foreach (Claim claim in User.Claims)
                 {
                     if (claim.Type.ToString().Equals("name"))
+                    {
                         return claim.Value.ToString();
+                    }
                 }
             }
             return "";
@@ -420,8 +441,9 @@ namespace FenixAlliance.Data.Access.Helpers
                 foreach (Claim claim in User.Claims)
                 {
                     if (claim.Type.ToString().Contains("nameidentifier"))
+                    {
                         return claim.Value.ToString();
-
+                    }
                 }
             }
             return "";
@@ -435,7 +457,9 @@ namespace FenixAlliance.Data.Access.Helpers
                 foreach (Claim claim in User.Claims)
                 {
                     if (claim.Type.ToString().Contains("newUser"))
+                    {
                         return claim.Value;
+                    }
                 }
             }
             return "";
@@ -449,8 +473,9 @@ namespace FenixAlliance.Data.Access.Helpers
                 foreach (Claim claim in User.Claims)
                 {
                     if (claim.Type.ToString().Contains("surname"))
+                    {
                         return claim.Value.ToString();
-
+                    }
                 }
             }
             return "";
@@ -464,8 +489,9 @@ namespace FenixAlliance.Data.Access.Helpers
                 foreach (Claim claim in User.Claims)
                 {
                     if (claim.Type.ToString().Contains("givenname"))
+                    {
                         return claim.Value.ToString();
-
+                    }
                 }
             }
             return "";
@@ -479,8 +505,9 @@ namespace FenixAlliance.Data.Access.Helpers
                 foreach (Claim claim in User.Claims)
                 {
                     if (claim.Type.ToString().Contains("jobTitle"))
+                    {
                         return claim.Value.ToString();
-
+                    }
                 }
             }
             return "";
@@ -494,8 +521,9 @@ namespace FenixAlliance.Data.Access.Helpers
                 foreach (Claim claim in User.Claims)
                 {
                     if (claim.Type.ToString().Contains("country"))
+                    {
                         return claim.Value.ToString();
-
+                    }
                 }
             }
             return "";
@@ -510,7 +538,9 @@ namespace FenixAlliance.Data.Access.Helpers
                 foreach (Claim claim in User.Claims)
                 {
                     if (claim.Type.ToString().Contains("email"))
+                    {
                         return claim.Value.ToString();
+                    }
                 }
             }
             return "";
@@ -524,7 +554,9 @@ namespace FenixAlliance.Data.Access.Helpers
                 foreach (Claim claim in User.Claims)
                 {
                     if (claim.Type.ToString().ToLower().Contains("identityprovider"))
+                    {
                         return claim.Value.ToString();
+                    }
                 }
             }
             return "";
@@ -538,7 +570,9 @@ namespace FenixAlliance.Data.Access.Helpers
                 foreach (Claim claim in User.Claims)
                 {
                     if (claim.Type.ToString().ToLower().Contains("token"))
+                    {
                         return claim.Value.ToString();
+                    }
                 }
             }
             return "";

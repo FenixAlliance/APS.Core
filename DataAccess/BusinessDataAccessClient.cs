@@ -71,14 +71,17 @@ namespace FenixAlliance.Data.Access.DataAccess
         {
             bool Authorized = false;
             if (Holder.SelectedBusiness == null)
+            {
                 return Authorized;
+            }
 
             try
             {
                 var CurrentBPR = GetCurrentBusinessProfileRecord(Holder);
                 if (CurrentBPR == null || CurrentBPR.IsDisabled)
+                {
                     return Authorized;
-
+                }
 
                 var BusinessSecurityRoles = CurrentBPR.BusinessProfileSecurityRoleGrants.Select(c => c.BusinessSecurityRole);
 
@@ -89,13 +92,17 @@ namespace FenixAlliance.Data.Access.DataAccess
                     RequiredRoles.ForEach(requestedRole =>
                     {
                         if (BusinessSecurityRoles.Any(c => c.ID == requestedRole))
+                        {
                             Authorized = true;
+                        }
                     });
                     // But if user do not owns one of the requested permissions, let's set this back to false.
                     RequiredRoles.ForEach(requestedRole =>
                     {
                         if (!BusinessSecurityRoles.Any(c => c.ID == requestedRole))
+                        {
                             Authorized = false;
+                        }
                     });
                 }
 
@@ -112,14 +119,18 @@ namespace FenixAlliance.Data.Access.DataAccess
                     RequiredPermissions.ForEach(requestedScope =>
                     {
                         if (BusinessPermissions.Any(c => c.ID == requestedScope))
+                        {
                             Authorized = true;
+                        }
                     });
 
                     // But if user do not owns one of the requested permissions, let's set this back to false.
                     RequiredPermissions.ForEach(requestedScope =>
                     {
                         if (!BusinessPermissions.Any(c => c.ID == requestedScope))
+                        {
                             Authorized = false;
+                        }
                     });
                 }
             }
@@ -139,7 +150,9 @@ namespace FenixAlliance.Data.Access.DataAccess
             {
                 var RequestedBPR = GetSpecificBusinessProfileRecord(Holder, BusinessTenantID);
                 if (RequestedBPR == null)
+                {
                     return Authorized;
+                }
 
                 var BusinessSecurityRoles = RequestedBPR.BusinessProfileSecurityRoleGrants.Select(c => c.BusinessSecurityRole);
 
@@ -149,13 +162,17 @@ namespace FenixAlliance.Data.Access.DataAccess
                     RequiredRoles.ForEach(requestedRole =>
                     {
                         if (BusinessSecurityRoles.Any(c => c.ID == requestedRole))
+                        {
                             Authorized = true;
+                        }
                     });
                     // But if user do not owns one of the requested permissions, let's set this back to false.
                     RequiredRoles.ForEach(requestedRole =>
                     {
                         if (!BusinessSecurityRoles.Any(c => c.ID == requestedRole))
+                        {
                             Authorized = false;
+                        }
                     });
                 }
 
@@ -170,14 +187,18 @@ namespace FenixAlliance.Data.Access.DataAccess
                     RequiredPermissions.ForEach(requestedScope =>
                     {
                         if (BusinessPermissions.Any(c => c.ID == requestedScope))
+                        {
                             Authorized = true;
+                        }
                     });
 
                     // But if user do not owns one of the requested permissions, let's set this back to false.
                     RequiredPermissions.ForEach(requestedScope =>
                     {
                         if (!BusinessPermissions.Any(c => c.ID == requestedScope))
+                        {
                             Authorized = false;
+                        }
                     });
                 }
 
@@ -199,7 +220,9 @@ namespace FenixAlliance.Data.Access.DataAccess
                 var RequestedBPR = await GetSpecificBusinessProfileRecordAsync(HolderID, BusinessTenantID);
 
                 if (RequestedBPR == null)
+                {
                     return GrantedPermissions;
+                }
 
                 var BusinessSecurityRoles = RequestedBPR.BusinessProfileSecurityRoleGrants.Select(c => c.BusinessSecurityRole);
 
@@ -240,7 +263,9 @@ namespace FenixAlliance.Data.Access.DataAccess
                 .FirstOrDefaultAsync(c => c.GUID == HolderGUID);
 
             if (User.SelectedBusiness == null)
+            {
                 return null;
+            }
 
             return User.BusinessProfileRecords.First(c => c.BusinessID == User.SelectedBusiness.ID);
         }
@@ -292,7 +317,9 @@ namespace FenixAlliance.Data.Access.DataAccess
         public BusinessProfileRecord GetCurrentBusinessProfileRecord(AllianceIDHolder Holder)
         {
             if (Holder.SelectedBusiness == null)
+            {
                 return null;
+            }
 
             return Holder.BusinessProfileRecords.First(c => c.BusinessID == Holder.SelectedBusiness.ID);
         }

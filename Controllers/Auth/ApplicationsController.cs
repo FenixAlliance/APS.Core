@@ -1,48 +1,41 @@
-﻿using FenixAlliance.Data;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using FenixAlliance.ABM.Data;
 using FenixAlliance.Data.Access.DataAccess;
 using FenixAlliance.Data.Access.Helpers;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
-
-namespace FenixAlliance.API.v2.Controllers.Developers
+namespace FenixAlliance.APS.Core.Controllers.Auth
 {
     [ApiController]
     [Route("api/v2/[controller]")]
     [ApiExplorerSettings(GroupName = "IAM")]
-    [Produces("application/json", new string[] { "application/xml" })]
-    [Consumes("application/json", new string[] { "application/xml" })]
+    [Produces("application/json", "application/xml")]
+    [Consumes("application/json", "application/xml")]
     public class ApplicationsController : ControllerBase
     {
-        private readonly ABMContext _context;
-        public AccountUsersHelpers AccountTools { get; set; }
-        public AccountGraphHelpers AccountGraphTools { get; set; }
-        private readonly IHostEnvironment _env;
-        private readonly StoreHelpers StoreHelpers;
-        private readonly IConfiguration _configuration;
-        private readonly BlobStorageDataAccessClient DataTools;
-        private readonly BusinessDataAccessClient BusinessDataAccess;
+        public ABMContext DataContext { get; }
+        public StoreHelpers StoreHelpers { get; }
+        public IConfiguration Configuration { get; }
+        public IHostEnvironment HostEnvironment { get; }
+        public BusinessHelpers BusinessHelpers { get; }
+        public AccountUsersHelpers AccountUsersHelpers { get; }
+        public AccountGraphHelpers AccountGraphHelpers { get; }
+        public BusinessDataAccessClient BusinessDataAccess { get; }
+        public BlobStorageDataAccessClient StorageDataAccessClient { get; }
 
         public ApplicationsController(ABMContext context, IConfiguration configuration, IHostEnvironment hostingEnvironment)
         {
-            _context = context;
-            _configuration = configuration;
-            _env = hostingEnvironment;
-            AccountTools = new AccountUsersHelpers(context);
-            AccountGraphTools = new AccountGraphHelpers(_context, _configuration);
-            StoreHelpers = new StoreHelpers(_context);
-            DataTools = new BlobStorageDataAccessClient();
-            BusinessDataAccess = new BusinessDataAccessClient(_context, _configuration, _env);
+            DataContext = context;
+            Configuration = configuration;
+            HostEnvironment = hostingEnvironment;
+            StoreHelpers = new StoreHelpers(DataContext);
+            BusinessHelpers = new BusinessHelpers(context);
+            AccountUsersHelpers = new AccountUsersHelpers(context);
+            AccountGraphHelpers = new AccountGraphHelpers(DataContext, Configuration);
+            BusinessDataAccess = new BusinessDataAccessClient(DataContext, Configuration, HostEnvironment);
+            StorageDataAccessClient = new BlobStorageDataAccessClient();
         }
 
         [HttpGet("{AppID}")]

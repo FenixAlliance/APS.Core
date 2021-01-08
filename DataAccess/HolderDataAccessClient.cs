@@ -59,9 +59,13 @@ namespace FenixAlliance.Data.Access.DataAccess
         public Task<AllianceIDHolder> GetHolder(string HolderGUID, bool TrackEntity = false)
         {
             if (TrackEntity == true)
+            {
                 return _context.AllianceIDHolder.Include(c => c.SelectedBusiness).FirstAsync(c => c.GUID == HolderGUID);
+            }
             else
+            {
                 return _context.AllianceIDHolder.Include(c => c.SelectedBusiness).AsNoTracking().FirstAsync(c => c.GUID == HolderGUID);
+            }
         }
 
         public async Task UpdateHolder(AllianceIDHolder Holder)
@@ -85,7 +89,9 @@ namespace FenixAlliance.Data.Access.DataAccess
             .FirstOrDefaultAsync(c => c.GUID == HolderGUID);
 
             if (User.SelectedBusiness == null)
+            {
                 return null;
+            }
 
             return User.BusinessProfileRecords.First(c => c.BusinessID == User.SelectedBusiness.ID);
         }

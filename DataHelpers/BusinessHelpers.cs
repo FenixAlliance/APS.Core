@@ -94,7 +94,9 @@ namespace FenixAlliance.Data.Access.Helpers
                 .FirstOrDefaultAsync(c => c.GUID == GUID);
 
             if ((Tenant.SelectedBusiness == null) || (Tenant.SelectedBusinessID == null))
+            {
                 return await Task.FromResult<Business>(null);
+            }
 
             var BusinessWithSubscription = await _context.Business.AsNoTracking()
                 .Include(b => b.Country)
@@ -113,7 +115,9 @@ namespace FenixAlliance.Data.Access.Helpers
         {
             // Check for existance business data and User Tenant
             if (_context.Business.Any(m => m.ID == BusinessID) || BusinessID == null || User.Identity.IsAuthenticated == false)
+            {
                 return false;
+            }
 
             var GUID = AccountTools.GetActiveDirectoryGUID(User);
             var Tenant = await _context.AllianceIDHolder.AsNoTracking()
@@ -134,7 +138,9 @@ namespace FenixAlliance.Data.Access.Helpers
 
             // Check for existance business data and User Tenant
             if (_context.Business.Any(m => m.ID == BusinessID) || BusinessID == null || User.Identity.IsAuthenticated == false)
+            {
                 return false;
+            }
 
             var GUID = AccountTools.GetActiveDirectoryGUID(User);
             var Holder = await _context.AllianceIDHolder.AsNoTracking()
@@ -154,7 +160,9 @@ namespace FenixAlliance.Data.Access.Helpers
 
             // Check for existance business data and User Tenant
             if (!_context.Business.Any(m => m.ID == BusinessID) || BusinessID == null)
+            {
                 return null;
+            }
 
             return await _context.BusinessProfileRecord.AsNoTracking()
                 .Include(c => c.BusinessProfileSecurityRoleGrants)

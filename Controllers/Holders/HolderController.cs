@@ -1,56 +1,53 @@
-﻿using Microsoft.AspNetCore.Http;
-using FenixAlliance.Data;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FenixAlliance.ABM.Data;
 using FenixAlliance.Data.Access.DataAccess;
 using FenixAlliance.Data.Access.Helpers;
-using FenixAlliance.Models.Binders;
 using FenixAlliance.Models.Binders.Social;
 using FenixAlliance.Models.DTOs.Components.Businesses;
+using FenixAlliance.Models.DTOs.Components.ID;
 using FenixAlliance.Models.DTOs.Components.Social;
 using FenixAlliance.Models.DTOs.Responses;
-using FenixAlliance.Models.DTOs.Responses.Base;
 using FenixAlliance.Models.DTOs.Responses.Business;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
 using FollowRecord = FenixAlliance.Models.DTOs.Components.Social.FollowRecord;
-using FenixAlliance.Models.DTOs.Components.ID;
-using Microsoft.AspNetCore.Cors;
 
-namespace FenixAlliance.API.v2.Controllers.ID.Me
+namespace FenixAlliance.APS.Core.Controllers.Holders
 {
     [ApiController]
     [Route("api/v2/Me")]
     [ApiExplorerSettings(GroupName = "Holders")]
-    [Produces("application/json", new string[] { "application/xml" })]
-    [Consumes("application/json", new string[] { "application/xml" })]
+    [Produces("application/json", "application/xml")]
+    [Consumes("application/json", "application/xml" )]
     public class HolderController : ControllerBase
     {
-
-        private readonly ABMContext _context;
-        public AccountUsersHelpers AccountTools { get; set; }
-        public AccountGraphHelpers AccountGraphTools { get; set; }
-        private readonly IConfiguration _configuration;
-        private readonly IHostEnvironment _env;
-        private readonly BlobStorageDataAccessClient DataTools;
-        private readonly BusinessDataAccessClient BusinessDataAccess;
-        private readonly StoreHelpers StoreHelpers;
+        public ABMContext DataContext { get; }
+        public StoreHelpers StoreHelpers { get; }
+        public IConfiguration Configuration { get; }
+        public IHostEnvironment HostEnvironment { get; }
+        public BusinessHelpers BusinessHelpers { get; }
+        public AccountUsersHelpers AccountUsersHelpers { get; }
+        public AccountGraphHelpers AccountGraphHelpers { get; }
+        public BusinessDataAccessClient BusinessDataAccess { get; }
+        public BlobStorageDataAccessClient StorageDataAccessClient { get; }
 
         public HolderController(ABMContext context, IConfiguration configuration, IHostEnvironment hostingEnvironment)
         {
-            _context = context;
-            _configuration = configuration;
-            _env = hostingEnvironment;
-            AccountTools = new AccountUsersHelpers(context);
-            AccountGraphTools = new AccountGraphHelpers(_context, _configuration);
-            StoreHelpers = new StoreHelpers(_context);
-            DataTools = new BlobStorageDataAccessClient();
-            BusinessDataAccess = new BusinessDataAccessClient(_context, _configuration, _env);
+            DataContext = context;
+            Configuration = configuration;
+            HostEnvironment = hostingEnvironment;
+            StoreHelpers = new StoreHelpers(DataContext);
+            BusinessHelpers = new BusinessHelpers(context);
+            AccountUsersHelpers = new AccountUsersHelpers(context);
+            AccountGraphHelpers = new AccountGraphHelpers(DataContext, Configuration);
+            BusinessDataAccess = new BusinessDataAccessClient(DataContext, Configuration, HostEnvironment);
+            StorageDataAccessClient = new BlobStorageDataAccessClient();
         }
 
         /// <summary>
@@ -65,11 +62,13 @@ namespace FenixAlliance.API.v2.Controllers.ID.Me
         public async Task<ActionResult<APIResponse>> GetMe()
         {
 
-            var Response = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(_context, HttpContext, Request, AccountTools, User)));
-            if (Response == null || !Response.Status.Success || Response.Holder == null)
-                return Unauthorized(Response.Status);
+            var APIResponse = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
+            if (APIResponse == null || !APIResponse.Status.Success || APIResponse.Holder == null)
+            {
+                return Unauthorized(APIResponse?.Status);
+            }
 
-            return Ok(Response.Holder);
+            return Ok(APIResponse.Holder);
         }
 
 
@@ -80,18 +79,20 @@ namespace FenixAlliance.API.v2.Controllers.ID.Me
         public async Task<ActionResult<APISocialActivityResponse>> GetMyFollows(int PageSize = 25, int PageIndex = 0)
         {
             // Get Header
-            var Response = JsonConvert.DeserializeObject<APISocialActivityResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(_context, HttpContext, Request, AccountTools, User)));
-            if (Response == null || !Response.Status.Success || Response.Holder == null)
-                return Unauthorized(Response.Status);
+            var APIResponse = JsonConvert.DeserializeObject<APISocialActivityResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
+            if (APIResponse == null || !APIResponse.Status.Success || APIResponse.Holder == null)
+            {
+                return Unauthorized(APIResponse?.Status);
+            }
 
             // Get Alliance ID Social Profile from DB
-            var Tenant = await AccountTools.GetTenantSocialProfileAsync(Response.Holder.ID);
+            var Tenant = await AccountUsersHelpers.GetTenantSocialProfileAsync(APIResponse.Holder.ID);
 
 
-            Response.Pagination.PageIndex = PageIndex;
-            Response.Pagination.PageSize = PageSize;
+            APIResponse.Pagination.PageIndex = PageIndex;
+            APIResponse.Pagination.PageSize = PageSize;
 
-            Response.FollowRecords = new List<FollowRecord>();
+            APIResponse.FollowRecords = new List<FollowRecord>();
 
             foreach (var item in Tenant.SocialProfile.Follows)
             {
@@ -104,23 +105,23 @@ namespace FenixAlliance.API.v2.Controllers.ID.Me
                     Type = item.FollowRecordType.ToString(),
                 };
 
-                // Deterimine if CUSAR.SPID Follows => FA.SPID and then assing to => FID
-                var Follow = (ABM.Models.Social.Follows.FollowRecord)Tenant.SocialProfile.Follows.FirstOrDefault(c => c.FollowerSocialProfileID == Response.Holder.ID && c.FollowedSocialProfileID == FA.FollowedID);
+                // Determine if CUSAR.SPID Follows => FA.SPID and then assign to => FID
+                var Follow = Tenant.SocialProfile.Follows.FirstOrDefault(c => c.FollowerSocialProfileID == APIResponse.Holder.ID && c.FollowedSocialProfileID == FA.FollowedID);
 
-                Follow = (Follow == null) ? (ABM.Models.Social.Follows.FollowRecord)Tenant.SocialProfile.Follows.FirstOrDefault(c => c.FollowerSocialProfileID == Response.Holder.ID && c.FollowedSocialProfileID == FA.FollowedID) : Follow;
+                Follow ??= Tenant.SocialProfile.Follows.FirstOrDefault(c => c.FollowerSocialProfileID == APIResponse.Holder.ID && c.FollowedSocialProfileID == FA.FollowedID);
 
                 FA.ID = Follow?.ID;
 
-                // Deterimine if Follow Exsists FID
-                // Deterimine if FA.SPID follows CUSAR.SPID and then assing to => FBID
-                var FollowBack = (ABM.Models.Social.Follows.FollowRecord)Tenant.SocialProfile.Followers.FirstOrDefault(c => c.FollowerSocialProfileID == FA.FollowerID && c.FollowedSocialProfileID == Response.Holder.ID);
-                FollowBack = (FollowBack == null) ? (ABM.Models.Social.Follows.FollowRecord)Tenant.SocialProfile.Followers.FirstOrDefault(c => c.FollowerSocialProfileID == FA.FollowerID && c.FollowedSocialProfileID == Response.Holder.ID) : FollowBack;
+                // Determine if Follow Exists FID
+                // Determine if FA.SPID follows CUSAR.SPID and then assign to => FBID
+                var FollowBack = Tenant.SocialProfile.Followers.FirstOrDefault(c => c.FollowerSocialProfileID == FA.FollowerID && c.FollowedSocialProfileID == APIResponse.Holder.ID);
+                FollowBack ??= Tenant.SocialProfile.Followers.FirstOrDefault(c => c.FollowerSocialProfileID == FA.FollowerID && c.FollowedSocialProfileID == APIResponse.Holder.ID);
                 // FA.FollowBackID = FollowBack?.ID;
-                Response.FollowRecords.Add(FA);
+                APIResponse.FollowRecords.Add(FA);
             }
 
 
-            return Ok(Response.FollowRecords);
+            return Ok(APIResponse.FollowRecords);
         }
 
         [HttpGet("Follows")]
@@ -130,21 +131,23 @@ namespace FenixAlliance.API.v2.Controllers.ID.Me
         public async Task<ActionResult<APISocialActivityResponse>> GetMyFollowers(int PageSize = 25, int PageIndex = 0)
         {
             // Get Header
-            var Response = JsonConvert.DeserializeObject<APISocialActivityResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(_context, HttpContext, Request, AccountTools, User)));
-            if (Response == null || !Response.Status.Success || Response.Holder == null)
-                return Unauthorized(Response.Status);
+            var APIResponse = JsonConvert.DeserializeObject<APISocialActivityResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
+            if (APIResponse == null || !APIResponse.Status.Success || APIResponse.Holder == null)
+            {
+                return Unauthorized(APIResponse?.Status);
+            }
 
             // Get Alliance ID Social Profile from DB
-            var Tenant = await AccountTools.GetTenantSocialProfileAsync(Response.Holder.ID);
+            var Tenant = await AccountUsersHelpers.GetTenantSocialProfileAsync(APIResponse.Holder.ID);
 
-            Response.Pagination.PageIndex = PageIndex;
-            Response.Pagination.PageSize = PageSize;
+            APIResponse.Pagination.PageIndex = PageIndex;
+            APIResponse.Pagination.PageSize = PageSize;
 
-            Response.FollowRecords = new List<FollowRecord>();
+            APIResponse.FollowRecords = new List<FollowRecord>();
 
             foreach (var item in Tenant.SocialProfile.Followers)
             {
-                var FA = new FollowRecord()
+                var FollowRecord = new FollowRecord()
                 {
                     ID = item.ID,
                     FollowerID = item.FollowerSocialProfileID,
@@ -152,20 +155,19 @@ namespace FenixAlliance.API.v2.Controllers.ID.Me
                     Alerts = item.EnableNotifications,
                     Type = item.FollowRecordType.ToString(),
                 };
-                // Deterimine if CUSAR.SPID Follows => FA.SPID and then assing to => FID
-                var Follow = (ABM.Models.Social.Follows.FollowRecord)Tenant.SocialProfile.Follows.FirstOrDefault(c => c.FollowerSocialProfileID == Response.Holder.ID && c.FollowedSocialProfileID == FA.FollowedID);
-                Follow = (Follow == null) ? (ABM.Models.Social.Follows.FollowRecord)Tenant.SocialProfile.Follows.FirstOrDefault(c => c.FollowerSocialProfileID == Response.Holder.ID && c.FollowedSocialProfileID == FA.FollowedID) : Follow;
-                FA.ID = Follow?.ID;
-                // Deterimine if Follow Exsists FID
-                // Deterimine if FA.SPID follows CUSAR.SPID and then assing to => FBID
-                var FollowBack = (ABM.Models.Social.Follows.FollowRecord)Tenant.SocialProfile.Followers.FirstOrDefault(c => c.FollowerSocialProfileID == FA.FollowedID && c.FollowedSocialProfileID == Response.Holder.ID);
-                FollowBack = (FollowBack == null) ? (ABM.Models.Social.Follows.FollowRecord)Tenant.SocialProfile.Followers.FirstOrDefault(c => c.FollowerSocialProfileID == FA.FollowedID && c.FollowedSocialProfileID == Response.Holder.ID) : FollowBack;
+                // Determine if CUSAR.SPID Follows => FA.SPID and then assing to => FID
+                var Follow = Tenant.SocialProfile.Follows.FirstOrDefault(c => c.FollowerSocialProfileID == APIResponse.Holder.ID && c.FollowedSocialProfileID == FollowRecord.FollowedID);
+                FollowRecord.ID = Follow?.ID;
+                // Determine if Follow Exists FID
+                // Determine if FA.SPID follows CUSAR.SPID and then assign to => FBID
+                var FollowBack = Tenant.SocialProfile.Followers.FirstOrDefault(c => c.FollowerSocialProfileID == FollowRecord.FollowedID && c.FollowedSocialProfileID == APIResponse.Holder.ID);
+                FollowRecord.ID = Follow?.ID;
                 // FA.FollowBackID = FollowBack?.ID;
-                Response.FollowRecords.Add(FA);
+                APIResponse.FollowRecords.Add(FollowRecord);
             }
 
 
-            return Ok(Response.FollowRecords);
+            return Ok(APIResponse.FollowRecords);
         }
 
         [HttpGet("Businesses")]
@@ -175,11 +177,13 @@ namespace FenixAlliance.API.v2.Controllers.ID.Me
         public async Task<ActionResult<List<Enrollment>>> GetMyBusinesses()
         {
             // Get Header
-            var Response = JsonConvert.DeserializeObject<BusinessEnrollmentsResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(_context, HttpContext, Request, AccountTools, User)));
-            if (Response == null || !Response.Status.Success || Response.Holder == null)
-                return Unauthorized(Response.Status);
+            var APIResponse = JsonConvert.DeserializeObject<BusinessEnrollmentsResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
+            if (APIResponse == null || !APIResponse.Status.Success || APIResponse.Holder == null)
+            {
+                return Unauthorized(APIResponse?.Status);
+            }
 
-            var Tenant = await _context.AllianceIDHolder
+            var Tenant = await DataContext.AllianceIDHolder
                 // Include Business Profile Records
                 .Include(b => b.Country)
                 .Include(b => b.SocialProfile)
@@ -193,11 +197,11 @@ namespace FenixAlliance.API.v2.Controllers.ID.Me
                 .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessPermissionGrants)
                     .ThenInclude(c => c.GrantorBusinessProfileRecord).ThenInclude(c => c.BusinessPermissionGrants).ThenInclude(c => c.BusinessPermission)
                 .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileDirectPermissionGrants).ThenInclude(c => c.BusinessPermission)
-                .Where(e => e.GUID == Response.Holder.ID).FirstOrDefaultAsync().ConfigureAwait(false);
+                .Where(e => e.GUID == APIResponse.Holder.ID).FirstOrDefaultAsync().ConfigureAwait(false);
 
 
 
-            Response.Enrollments = new List<Enrollment>();
+            APIResponse.Enrollments = new List<Enrollment>();
 
 
             foreach (var item in Tenant.BusinessProfileRecords)
@@ -220,10 +224,10 @@ namespace FenixAlliance.API.v2.Controllers.ID.Me
                     // TODO: Add Guest Property
                     AsGuest = BusinessDataAccess.ResolveRequestedAccess(Tenant, null, new List<string>() { "business_guest" }),
                 };
-                Response.Enrollments.Add(BRP);
+                APIResponse.Enrollments.Add(BRP);
             }
 
-            return Ok(Response.Enrollments);
+            return Ok(APIResponse.Enrollments);
         }
 
         [HttpGet("Library")]
@@ -233,13 +237,13 @@ namespace FenixAlliance.API.v2.Controllers.ID.Me
         public async Task<ActionResult<APIResponse>> GetMyLibrary()
         {
             // Get Header
-            var Response = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(_context, HttpContext, Request, AccountTools, User).ConfigureAwait(false)));
-            if (Response == null || !Response.Status.Success || Response.Holder == null)
-                return Unauthorized(Response.Status);
+            APIResponse APIResponse = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User).ConfigureAwait(false)));
+            if (APIResponse == null || !APIResponse.Status.Success || APIResponse.Holder == null)
+            {
+                return Unauthorized(APIResponse?.Status);
+            }
 
-
-
-            return Ok(Response);
+            return Ok(APIResponse);
         }
 
 
@@ -248,13 +252,13 @@ namespace FenixAlliance.API.v2.Controllers.ID.Me
         public async Task<ActionResult<APIResponse>> GetMyAddresses()
         {
             // Get Header
-            var Response = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(_context, HttpContext, Request, AccountTools, User)));
-            if (Response == null || !Response.Status.Success || Response.Holder == null)
-                return Unauthorized(Response);
+            var APIResponse = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
+            if (APIResponse == null || !APIResponse.Status.Success || APIResponse.Holder == null)
+            {
+                return Unauthorized(APIResponse);
+            }
 
-
-
-            return Ok(Response);
+            return Ok(APIResponse);
         }
 
         [HttpGet("Notifications")]
@@ -262,11 +266,13 @@ namespace FenixAlliance.API.v2.Controllers.ID.Me
         public async Task<ActionResult<List<Notification>>> GetMyNotifications()
         {
             // Get Header
-            var Response = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(_context, HttpContext, Request, AccountTools, User)));
-            if (Response == null || !Response.Status.Success || Response.Holder == null)
-                return Unauthorized(Response.Status);
+            var APIResponse = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
+            if (APIResponse == null || !APIResponse.Status.Success || APIResponse.Holder == null)
+            {
+                return Unauthorized(APIResponse?.Status);
+            }
 
-            var EndUser = await _context.AllianceIDHolder.Include(c => c.SocialProfile).ThenInclude(c => c.Notifications).FirstOrDefaultAsync(m => m.GUID == Response.Holder.ID);
+            var EndUser = await DataContext.AllianceIDHolder.Include(c => c.SocialProfile).ThenInclude(c => c.Notifications).FirstOrDefaultAsync(m => m.GUID == APIResponse.Holder.ID);
 
             return Ok(NotificationBinder.ToDTO(EndUser.SocialProfile.Notifications));
         }
@@ -277,15 +283,13 @@ namespace FenixAlliance.API.v2.Controllers.ID.Me
         public async Task<ActionResult<APIResponse>> GetMySettings()
         {
             // Get Header
-            var Response = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(_context, HttpContext, Request, AccountTools, User)));
-            if (Response == null || !Response.Status.Success || Response.Holder == null)
-                return Unauthorized(Response.Status);
+            var APIResponse = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
+            if (APIResponse == null || !APIResponse.Status.Success || APIResponse.Holder == null)
+            {
+                return Unauthorized(APIResponse?.Status);
+            }
 
-
-            return Ok(Response);
+            return Ok(APIResponse);
         }
-
-
-
     }
 }

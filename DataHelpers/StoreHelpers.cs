@@ -2,8 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
-using Newtonsoft.Json;
 using System.Threading.Tasks;
 using FenixAlliance.ABM.Data;
 using FenixAlliance.ABM.Data.Access.Interfaces.DataHelpers;
@@ -12,6 +10,7 @@ using FenixAlliance.Data.Access.DataAccess;
 using FenixAlliance.Models.DTOs.Components.Global.Currencies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.WindowsAzure.Storage.Blob;
+using Newtonsoft.Json;
 
 namespace FenixAlliance.Data.Access.Helpers
 {
@@ -30,7 +29,9 @@ namespace FenixAlliance.Data.Access.Helpers
         {
 
             if (String.IsNullOrEmpty(Item.OpenCurrencyExchangeRates))
+            {
                 Item.OpenCurrencyExchangeRates = (await _context.Settings.AsNoTracking().FirstOrDefaultAsync(c => c.SettingsPK == "General")).OpenCurrencyExchangeRates;
+            }
 
             var ForexRates = JsonConvert.DeserializeObject<CurrencyExchangeRates>(Item.OpenCurrencyExchangeRates);
             var ItemCurrency = Item.CurrencyID.Split('.')[0];
@@ -60,30 +61,42 @@ namespace FenixAlliance.Data.Access.Helpers
                     {
                         // Check from and due dates to aplly discount. if not in range, apply regular price
                         if (DateTime.Compare(DateTime.Now, Item.DeadlineDiscountDueDate) <= 0)
+                        {
                             // Meets criteria for deadline discount
                             PriceAfterDiscounts = Item.DiscountPrice / ConversionRate;
+                        }
                         else
+                        {
                             // Not in range for discount, apply regular price instead.
                             PriceAfterDiscounts = RegularPrice;
+                        }
                     }
                     else
+                    {
                         // Not deadline discount, just apply discount
                         PriceAfterDiscounts = Item.DiscountPrice / ConversionRate;
+                    }
                 }
                 else
                 {
                     if (Item.IsDeadlineDiscount)
                     {
                         if (DateTime.Compare(DateTime.Now, Item.DeadlineDiscountDueDate) <= 0)
+                        {
                             // In Range for discount, get discount ammount and aplly it to regular price
                             PriceAfterDiscounts = (RegularPrice - (RegularPrice * (Item.DiscountPercentage / 100)));
+                        }
                         else
+                        {
                             // Not in range for discount, apply regular price instead.
                             PriceAfterDiscounts = RegularPrice;
+                        }
                     }
                     else
+                    {
                         // Not Deadline Discount, apply discount
                         PriceAfterDiscounts = (RegularPrice - (RegularPrice * (Item.DiscountPercentage / 100)));
+                    }
                 }
             }
             else
@@ -226,6 +239,7 @@ namespace FenixAlliance.Data.Access.Helpers
             try
             {
                 if (!String.IsNullOrEmpty(CartID) && !String.IsNullOrWhiteSpace(CartID) && !String.IsNullOrEmpty(ItemID) && !String.IsNullOrWhiteSpace(ItemID) && !String.IsNullOrEmpty(UsageRecordType) && !String.IsNullOrWhiteSpace(UsageRecordType))
+                {
                     using (MemoryStream stream = new MemoryStream())
                     {
                         await UsageAppendBlobReference.DownloadToStreamAsync(stream);
@@ -237,6 +251,7 @@ namespace FenixAlliance.Data.Access.Helpers
                             await UsageAppendBlobReference.UploadFromStreamAsync(stream);
                         }
                     }
+                }
             }
             catch (Exception)
             {

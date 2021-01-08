@@ -1,54 +1,54 @@
-﻿using FenixAlliance.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using FenixAlliance.ABM.Data;
+using FenixAlliance.ABM.Models.Global.Integrations.Applications;
+using FenixAlliance.ABM.Models.Tenants.BusinessProfileRecords;
+using FenixAlliance.ABM.SDK.Helpers;
+using FenixAlliance.Data.Access.DataAccess;
+using FenixAlliance.Data.Access.Helpers;
+using FenixAlliance.Models.DTOs.Authorization;
+using FenixAlliance.Models.DTOs.Responses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using FenixAlliance.Data.Access.DataAccess;
-using FenixAlliance.Data.Access.Helpers;
-using FenixAlliance.Models.DTOs.Authorization;
-using AccountUsersHelpers = FenixAlliance.Data.Access.Helpers.AccountUsersHelpers;
-using FenixAlliance.Models.DTOs.Responses;
-using System.Text.Json;
-using FenixAlliance.ABM.Data;
-using FenixAlliance.ABM.Models.Global.Integrations.Applications;
-using FenixAlliance.ABM.Models.Tenants.BusinessProfileRecords;
-using FenixAlliance.ABM.SDK.Helpers;
 
-namespace FenixAlliance.API.v2.Controllers.Authorization
+namespace FenixAlliance.APS.Core.Controllers.Auth
 {
     [ApiController]
     [Route("api/v2/[controller]")]
     [ApiExplorerSettings(GroupName = "IAM")]
-    [Produces("application/json", new string[] { "application/xml" })]
-    [Consumes("application/json", new string[] { "application/xml" })]
+    [Produces("application/json", "application/xml")]
+    [Consumes("application/json", "application/xml")]
     public class OAuth2Controller : ControllerBase
     {
-        private readonly ABMContext _context;
-        public AccountUsersHelpers AccountTools { get; set; }
-        public AccountGraphHelpers AccountGraphTools { get; set; }
-        private readonly IConfiguration _configuration;
-        private readonly IHostEnvironment _env;
-        private readonly BlobStorageDataAccessClient DataTools;
-        private readonly BusinessDataAccessClient BusinessDataAccess;
-        private readonly StoreHelpers StoreHelpers;
+        public ABMContext DataContext { get; }
+        public StoreHelpers StoreHelpers { get; }
+        public IConfiguration Configuration { get; }
+        public IHostEnvironment HostEnvironment { get; }
+        public BusinessHelpers BusinessHelpers { get; }
+        public AccountUsersHelpers AccountUsersHelpers { get; }
+        public AccountGraphHelpers AccountGraphHelpers { get; }
+        public BusinessDataAccessClient BusinessDataAccess { get; }
+        public BlobStorageDataAccessClient StorageDataAccessClient { get; }
 
         public OAuth2Controller(ABMContext context, IConfiguration configuration, IHostEnvironment hostingEnvironment)
         {
-            _context = context;
-            _configuration = configuration;
-            _env = hostingEnvironment;
-            AccountTools = new AccountUsersHelpers(context);
-            AccountGraphTools = new AccountGraphHelpers(_context, _configuration);
-            StoreHelpers = new StoreHelpers(_context);
-            DataTools = new BlobStorageDataAccessClient();
-            BusinessDataAccess = new BusinessDataAccessClient(_context, _configuration, _env);
+            DataContext = context;
+            Configuration = configuration;
+            HostEnvironment = hostingEnvironment;
+            StoreHelpers = new StoreHelpers(DataContext);
+            BusinessHelpers = new BusinessHelpers(context);
+            AccountUsersHelpers = new AccountUsersHelpers(context);
+            AccountGraphHelpers = new AccountGraphHelpers(DataContext, Configuration);
+            BusinessDataAccess = new BusinessDataAccessClient(DataContext, Configuration, HostEnvironment);
+            StorageDataAccessClient = new BlobStorageDataAccessClient();
         }
 
         /// <summary>
@@ -65,8 +65,10 @@ namespace FenixAlliance.API.v2.Controllers.Authorization
                 /* TODO: Assert the grant type and act based on it.
                  */
                 var Enrollment = new BusinessProfileRecord();
-                if (String.IsNullOrEmpty(grant_type))
+                if (string.IsNullOrEmpty(grant_type))
+                {
                     return BadRequest("grant_type not present.");
+                }
 
                 switch (grant_type)
                 {
@@ -75,27 +77,31 @@ namespace FenixAlliance.API.v2.Controllers.Authorization
                     case "client_credentials":
 
                         /* 1.  Check for required properties.
-                         * 2.  Try to retrieve the current secret usign client_id (Public Key) and client_secret (Private Key).
+                         * 2.  Try to retrieve the current secret using client_id (Public Key) and client_secret (Private Key).
                          * 3.  Assert that the secret exists.
-                         * 4.  Assert the existance of the requested enrollment or fallback to application owner.
-                         * 5.  Assert the existance of each and every requested scope within the context of a particular tenant. (A.K.A Granted for the entire organization)
-                         * 6.  Assert the existance of each and every requested scope within the context of a particular enrollment. (A.K.A Granted granularly for a particular BPR)
+                         * 4.  Assert the existence of the requested enrollment or fallback to application owner.
+                         * 5.  Assert the existence of each and every requested scope within the context of a particular tenant. (A.K.A Granted for the entire organization)
+                         * 6.  Assert the existence of each and every requested scope within the context of a particular enrollment. (A.K.A Granted granular for a particular BPR)
                          * 7.  Build the JWT Header.
                          * 8.  Build the JWT Payload.
                          * 9.  Get both public and private signing keys as RSAParameters.
-                         * 10. Sign the JWT Payload and compose the token response.
+                         * 10. Sign the JWT Payload and compose the token APIResponse.
                          */
 
                         // 1. Check for required properties
                         if (String.IsNullOrEmpty(client_id) || String.IsNullOrEmpty(client_secret))
+                        {
                             return BadRequest();
+                        }
 
                         if (requested_scopes == null || !requested_scopes.ToList().Any())
+                        {
                             return BadRequest();
+                        }
 
 
-                        // 2. Try to retrieve the current secret usign client_id (Public Key) and client_secret (Private Key).
-                        var SecretsSet = await _context.BusinessApplicationSecret
+                        // 2. Try to retrieve the current secret using client_id (Public Key) and client_secret (Private Key).
+                        var SecretsSet = await DataContext.BusinessApplicationSecret
                             .Include(c => c.BusinessApplication).ThenInclude(c => c.BusinessApplicationPermissionGrants).ThenInclude(c => c.BusinessPermission)
                             .Include(c => c.BusinessApplication).ThenInclude(c => c.BusinessApplicationRequestedPermissions).ThenInclude(c => c.BusinessPermission)
                             .Include(c => c.BusinessApplication).ThenInclude(c => c.BusinessApplicationSecurityRoleGrants).ThenInclude(c => c.BusinessSecurityRole).ThenInclude(c => c.BusinessRolePermissionGrants).ThenInclude(c => c.BusinessPermission)
@@ -104,65 +110,84 @@ namespace FenixAlliance.API.v2.Controllers.Authorization
 
                         // 3. Assert that the secret exists.
                         if (SecretsSet == null)
+                        {
                             return Unauthorized();
+                        }
 
 
-                        // 4. Assert the existance of the requested enrollment or fallback to application owner. Bad Request if not found.
+                        // 4. Assert the existence of the requested enrollment or fallback to application owner. Bad Request if not found.
                         var EnrollmentID = string.Empty;
 
-                        if (String.IsNullOrEmpty(requested_enrollment) || !await _context.BusinessProfileRecord.AnyAsync(c => c.ID == requested_enrollment))
+                        if (String.IsNullOrEmpty(requested_enrollment) || !await DataContext.BusinessProfileRecord.AnyAsync(c => c.ID == requested_enrollment))
                         {
-                            if (!await _context.BusinessProfileRecord.AnyAsync(c => c.ID == Enrollment.ID))
+                            if (!await DataContext.BusinessProfileRecord.AnyAsync(c => c.ID == Enrollment.ID))
+                            {
                                 EnrollmentID = SecretsSet.BusinessApplication.BusinessProfileRecordID;
+                            }
                         }
                         else
                         {
                             EnrollmentID = requested_enrollment;
                         }
 
-                        if (String.IsNullOrEmpty(EnrollmentID) || !await _context.BusinessProfileRecord.AnyAsync(c => c.ID == EnrollmentID))
+                        if (String.IsNullOrEmpty(EnrollmentID) || !await DataContext.BusinessProfileRecord.AnyAsync(c => c.ID == EnrollmentID))
+                        {
                             return BadRequest("Invalid Enrollment.");
+                        }
 
-                        Enrollment = await _context.BusinessProfileRecord
+                        Enrollment = await DataContext.BusinessProfileRecord
                             .Include(c => c.BusinessProfileDirectPermissionGrants).ThenInclude(c => c.BusinessPermission)
                             .Include(c => c.BusinessProfileSecurityRoleGrants).ThenInclude(c => c.BusinessSecurityRole).ThenInclude(c => c.BusinessRolePermissionGrants).ThenInclude(c => c.BusinessPermission)
                             .FirstAsync(c => c.ID == EnrollmentID);
 
-
                         var RequiredAppPermissions = SecretsSet.BusinessApplication.BusinessApplicationRequestedPermissions.Where(c => c.IsOptional == false).Select(c => c.BusinessPermission).Select(c => c.ID).ToList();
-                        // 5. Assert the existance of each and every requested scope within the context of a particular tenant. (A.K.A Granted for the entire organization)
+                        
+                        // 5. Assert the existence of each and every requested scope within the context of a particular tenant. (A.K.A Granted for the entire organization)
                         var GrantedAppPermissionsThroughRoles = SecretsSet.BusinessApplication.BusinessApplicationSecurityRoleGrants.Where(c => c.BusinessSecurityRole.BusinessID == Enrollment.BusinessID).Select(c => c.BusinessSecurityRole).SelectMany(c => c.BusinessRolePermissionGrants).Select(c => c.BusinessPermission);
-                        var GrantedAppDirectPermissions = SecretsSet.BusinessApplication.BusinessApplicationPermissionGrants.Where(c => c.BusinessID == Enrollment.BusinessID).Select(c => c.BusinessPermission);
+                        
+                        var GrantedAppDirectPermissions = SecretsSet.BusinessApplication
+                            .BusinessApplicationPermissionGrants.Where(c => c.BusinessID == Enrollment.BusinessID)
+                            .Select(c => c.BusinessPermission);
+                        
                         var ApplicationPermissions = GrantedAppPermissionsThroughRoles.Union(GrantedAppDirectPermissions).Select(c => c.ID);
 
-                        var PermissionsRequestedButNotGranted = RequiredAppPermissions.Except(ApplicationPermissions);
+                        var applicationPermissions = (string[]) ApplicationPermissions;
+                        var PermissionsRequestedButNotGranted = RequiredAppPermissions.Except(applicationPermissions.ToList());
 
                         if (PermissionsRequestedButNotGranted.Any())
+                        {
                             return Unauthorized("There are permissions that are required for this application, but have not been granted.");
+                        }
 
-                        // 6. Assert the existance of each and every requested scope within the context of a particular enrollment. (A.K.A Granted granularly for a particular BPR)
+                        // 6. Assert the existence of each and every requested scope within the context of a particular enrollment. (A.K.A Granted granular for a particular BPR)
                         var GrantedEnrollmentPermissionsThroughRoles = Enrollment.BusinessProfileSecurityRoleGrants.Where(c => c.BusinessSecurityRole.BusinessID == Enrollment.BusinessID || c.BusinessSecurityRole.IsSystemSecurityRole).Select(c => c.BusinessSecurityRole).SelectMany(c => c.BusinessRolePermissionGrants).Select(c => c.BusinessPermission);
                         var GrantedEnrollmentDirectPermissions = Enrollment.BusinessProfileDirectPermissionGrants.Where(c => c.BusinessID == Enrollment.BusinessID).Select(c => c.BusinessPermission);
                         var EnrollmentPermissions = GrantedEnrollmentPermissionsThroughRoles.Union(GrantedEnrollmentDirectPermissions).Select(c => c.ID);
 
                         // Assert that every requested scope is a valid scope
-                        bool AreRequestedScopesValid = true;
-                        requested_scopes?.Split(" ")?.ToList()?.ForEach(async requestedScope =>
+                        var AreRequestedScopesValid = true;
+                        requested_scopes.Split(" ")?.ToList().ForEach(async requestedScope =>
                         {
-                            if (await _context.BusinessPermission.AnyAsync(c => c.ID == requestedScope))
+                            if (await DataContext.BusinessPermission.AnyAsync(c => c.ID == requestedScope))
+                            {
                                 AreRequestedScopesValid = false;
+                            }
                         });
 
                         if (!AreRequestedScopesValid)
+                        {
                             return BadRequest("Invalid Scopes.");
+                        }
 
                         // Intersect Application Granted Permissions with Enrollment Granted Permissions.
-                        var ApplicationIntersectionEnrollmentPermissions = ApplicationPermissions.Intersect(EnrollmentPermissions);
+                        var ApplicationIntersectionEnrollmentPermissions = applicationPermissions.Intersect(EnrollmentPermissions);
                         var ScopePermissionsRequestedButNotGranted = requested_scopes.Split(" ").ToList().Except(ApplicationIntersectionEnrollmentPermissions.ToList());
 
                         // 3. Assert that the secret exists.
                         if (ScopePermissionsRequestedButNotGranted.Any())
+                        {
                             return Unauthorized("Not all the requested permissions have been granted for this application under the scope of this enrollment.");
+                        }
 
                         // 7.Build the JWT Header.
                         var Header = new JsonWebTokenHeader()
@@ -174,17 +199,17 @@ namespace FenixAlliance.API.v2.Controllers.Authorization
                         };
 
                         // 8. Build the JWT Payload.
-                        var AudienceEcheme = $"https://fenixalliance.com.co/api/v2/oauth2/{SecretsSet.BusinessApplication.ID}/{SecretsSet.BusinessApplication.BusinessID}/{Enrollment.ID}/";
+                        var AudienceSchema = $"https://fenixalliance.com.co/api/v2/oauth2/{SecretsSet.BusinessApplication.ID}/{SecretsSet.BusinessApplication.BusinessID}/{Enrollment.ID}/";
 
                         var Payload = new JsonWebTokenPayload()
                         {
-                            aud = AudienceEcheme,
+                            sub = Enrollment.ID,
+                            aud = AudienceSchema,
                             act = Enrollment.BusinessID,
                             aid = Enrollment.AllianceIDHolderGUID,
                             cid = SecretsSet.BusinessApplication.ID,
-                            sub = Enrollment.ID,
                             iss = $"https://fenixalliance.com.co/api/v2/oauth2/{SecretsSet.BusinessApplication.BusinessID}/{SecretsSet.BusinessApplication.ID}/",
-                            Scopes = requested_scopes?.Split(" ").ToList(),
+                            Scopes = requested_scopes.Split(" ").ToList(),
                             exp = (long)DateTime.Now.AddHours(1).ToUniversalTime().Subtract(new DateTime(1970, 1, 1)).TotalSeconds,
                             iat = (long)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds,
                             nbf = (long)DateTime.Now.AddMinutes(30).ToUniversalTime().Subtract(new DateTime(1970, 1, 1)).TotalSeconds,
@@ -199,7 +224,7 @@ namespace FenixAlliance.API.v2.Controllers.Authorization
                             var RSAParams = RSA.ExportParameters(true);
 
 
-                            // 10. Sign the JWT Payload and compose the token response.
+                            // 10. Sign the JWT Payload and compose the token APIResponse.
                             JWT = new JsonWebToken()
                             {
                                 TokenType = "Bearer",
@@ -214,7 +239,9 @@ namespace FenixAlliance.API.v2.Controllers.Authorization
                 }
 
                 if (String.IsNullOrEmpty(JWT.AccessToken))
+                {
                     return BadRequest("Token request was unsuccessful.");
+                }
             }
             catch
             {
@@ -229,12 +256,13 @@ namespace FenixAlliance.API.v2.Controllers.Authorization
         [Produces("application/json")]
         public async Task<ActionResult> Get(string TenantID)
         {
-            var Response = JsonSerializer.Deserialize<APIResponse>(JsonSerializer.Serialize(await APIHelpers.BindAPIBaseResponse(_context, HttpContext, Request, AccountTools, User, TenantID)));
-            if (Response == null || !Response.Status.Success || Response.Holder == null || Response.Tenant == null)
-                return Unauthorized(Response.Status);
+            var APIResponse = JsonSerializer.Deserialize<APIResponse>(JsonSerializer.Serialize(await APIHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User, TenantID)));
+            if (APIResponse == null || !APIResponse.Status.Success || APIResponse.Holder == null || APIResponse.Tenant == null)
+            {
+                return Unauthorized(APIResponse?.Status);
+            }
 
-
-            return Ok(Response);
+            return Ok(APIResponse);
         }
 
         /// <summary>
@@ -246,11 +274,13 @@ namespace FenixAlliance.API.v2.Controllers.Authorization
         {
 
             // 1. Check for required properties
-            if (String.IsNullOrEmpty(ApplicationID) || !await _context.BusinessApplication.AnyAsync(c => c.ID == ApplicationID))
+            if (string.IsNullOrEmpty(ApplicationID) || !await DataContext.BusinessApplication.AnyAsync(c => c.ID == ApplicationID))
+            {
                 return BadRequest();
+            }
 
-            // 2. Try to retrieve the current secret usign client_id (Public Key) and client_secret (Private Key).
-            var Secrets = await _context.BusinessApplicationSecret
+            // 2. Try to retrieve the current secret using client_id (Public Key) and client_secret (Private Key).
+            var Secrets = await DataContext.BusinessApplicationSecret
                 .Include(c => c.BusinessApplication).ThenInclude(c => c.BusinessApplicationRequestedPermissions).ThenInclude(c => c.BusinessPermission)
                 .Include(c => c.BusinessApplication).ThenInclude(c => c.BusinessApplicationPermissionGrants).ThenInclude(c => c.BusinessPermission)
                 .Include(c => c.BusinessApplication).ThenInclude(c => c.BusinessApplicationSecurityRoleGrants).ThenInclude(c => c.BusinessSecurityRole)
@@ -274,13 +304,19 @@ namespace FenixAlliance.API.v2.Controllers.Authorization
 
                 // Get NBF
                 if (secret.BusinessApplicationSecretPeriod == BusinessApplicationSecretPeriod.OneYear)
+                {
                     JWK.Nbf = (long)(secret.Timestamp.AddYears(1).Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+                }
 
                 if (secret.BusinessApplicationSecretPeriod == BusinessApplicationSecretPeriod.TwoYears)
+                {
                     JWK.Nbf = (long)(secret.Timestamp.AddYears(2).Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+                }
 
                 if (secret.BusinessApplicationSecretPeriod == BusinessApplicationSecretPeriod.DontExpire)
+                {
                     JWK.Nbf = (long)(new DateTime(2099, 1, 1).Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+                }
 
 
                 //Create a new instance of RSACryptoServiceProvider.
@@ -307,28 +343,31 @@ namespace FenixAlliance.API.v2.Controllers.Authorization
         [HttpGet("{TenantID}/{ApplicationID}/.Well-Known/OpenId-Configuration")]
         public async Task<ActionResult<OpenIdConfiguration>> GetOpenIdConfiguration(string TenantID, string ApplicationID)
         {
-            if (String.IsNullOrEmpty(ApplicationID) || String.IsNullOrEmpty(TenantID) || !await _context.BusinessApplication.AnyAsync(c => c.ID == ApplicationID) || !await _context.Business.AnyAsync(c => c.ID == TenantID))
+            if (String.IsNullOrEmpty(ApplicationID) || string.IsNullOrEmpty(TenantID) || !await DataContext.BusinessApplication.AnyAsync(c => c.ID == ApplicationID) || !await DataContext.Business.AnyAsync(c => c.ID == TenantID))
+            {
                 return BadRequest("OpenID Configuration not found.");
+            }
 
-            var BusinessApplication = await _context.BusinessApplication
+            var BusinessApplication = await DataContext.BusinessApplication
                 .Include(c => c.BusinessApplicationRequestedPermissions).ThenInclude(c => c.BusinessPermission)
                 .FirstAsync(c => c.ID == ApplicationID);
 
 
-            var OpenIdConfiguration = new OpenIdConfiguration();
-            OpenIdConfiguration.ClaimsSupported = new List<string>();
-            OpenIdConfiguration.ScopesSupported = new List<string>();
-            OpenIdConfiguration.SubjectTypesSupported = new List<string>();
-            OpenIdConfiguration.ScopesSupported = new List<string>();
-            OpenIdConfiguration.IdTokenSigningAlgValuesSupported = new List<string>();
-            OpenIdConfiguration.TokenEndpointAuthMethodsSupported = new List<string>();
+            var OpenIdConfiguration = new OpenIdConfiguration
+            {
+                ClaimsSupported = new List<string>(),
+                ScopesSupported = new List<string>(),
+                SubjectTypesSupported = new List<string>(),
+                IdTokenSigningAlgValuesSupported = new List<string>(),
+                TokenEndpointAuthMethodsSupported = new List<string>(),
+                TokenEndpoint = "https://fenixalliance.com.co/api/v2/oauth2/Token",
+                JwksUri = $"https://fenixalliance.com.co/api/v2/oauth2/{ApplicationID}/keys",
+                EndSessionEndpoint = "https://fenixalliance.com.co/api/v2/oauth2/Token/Expire",
+                Issuer = $"https://fenixalliance.com.co/api/v2/oauth2/{TenantID}/{ApplicationID}/",
+                AuthorizationEndpoint = $"https://fenixalliance.com.co/api/v2/oauth2/{TenantID}/{ApplicationID}/Authorize"
+            };
 
 
-            OpenIdConfiguration.TokenEndpoint = $"https://fenixalliance.com.co/api/v2/oauth2/Token";
-            OpenIdConfiguration.JwksUri = $"https://fenixalliance.com.co/api/v2/oauth2/{ApplicationID}/keys";
-            OpenIdConfiguration.EndSessionEndpoint = $"https://fenixalliance.com.co/api/v2/oauth2/Token/Expire";
-            OpenIdConfiguration.Issuer = $"https://fenixalliance.com.co/api/v2/oauth2/{TenantID}/{ApplicationID}/";
-            OpenIdConfiguration.AuthorizationEndpoint = $"https://fenixalliance.com.co/api/v2/oauth2/{TenantID}/{ApplicationID}/Authorize";
 
             OpenIdConfiguration.ClaimsSupported.Add("name");
             OpenIdConfiguration.ClaimsSupported.Add("email");
@@ -345,14 +384,10 @@ namespace FenixAlliance.API.v2.Controllers.Authorization
             OpenIdConfiguration.ClaimsSupported.Add("ver");
             OpenIdConfiguration.ClaimsSupported.Add("nonce");
 
-
-
             OpenIdConfiguration.TokenEndpointAuthMethodsSupported.Add("client_secret_post");
             OpenIdConfiguration.TokenEndpointAuthMethodsSupported.Add("client_secret_basic");
 
-
             OpenIdConfiguration.SubjectTypesSupported.Add("pairwise");
-
 
             OpenIdConfiguration.IdTokenSigningAlgValuesSupported.Add("RS256");
 

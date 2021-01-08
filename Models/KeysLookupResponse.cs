@@ -1,17 +1,15 @@
 ﻿using System.Collections.Generic;
-using System.Globalization;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace FenixAlliance.Data.Access.Helpers.AADB2C
 {
-    public partial class KeysLookupResponse
+    public class KeysLookupResponse
     {
         [JsonProperty("keys")]
         public List<Key> Keys { get; set; }
     }
 
-    public partial class Key
+    public class Key
     {
         [JsonProperty("kid")]
         public string Kid { get; set; }

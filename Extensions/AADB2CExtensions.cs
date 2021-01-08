@@ -1,13 +1,13 @@
-﻿
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Threading.Tasks;
 
-namespace Microsoft.AspNetCore.Authentication
+namespace FenixAlliance.APS.Core.Extensions
 {
     public static class AADB2CExtensions
     {
@@ -48,7 +48,7 @@ namespace Microsoft.AspNetCore.Authentication
 
             public void Configure(OpenIdConnectOptions options)
             {
-                Configure(Options.DefaultName, options);
+                Configure(Microsoft.Extensions.Options.Options.DefaultName, options);
             }
 
             public Task OnRedirectToIdentityProvider(RedirectContext context)
