@@ -1,7 +1,7 @@
 ﻿using FenixAlliance.ABM.Data;
+using FenixAlliance.APS.Core.DataAccess;
+using FenixAlliance.APS.Core.DataHelpers;
 using FenixAlliance.APS.Core.Models;
-using FenixAlliance.Data.Access.DataAccess;
-using FenixAlliance.Data.Access.Helpers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;

@@ -7,13 +7,12 @@ using FenixAlliance.ABM.Data.Access.Interfaces.DataAccess;
 using FenixAlliance.ABM.Models.Social.Follows;
 using FenixAlliance.ABM.Models.Social.Notifications;
 using FenixAlliance.ABM.Models.Social.SocialProfiles.Scopes;
-using FenixAlliance.Data.Access.Helpers;
+using FenixAlliance.APS.Core.DataHelpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
-
-namespace FenixAlliance.Data.Access.DataAccess
+namespace FenixAlliance.APS.Core.DataAccess
 {
     public class SocialDataAcessClient : ISocialDataAccess
     {

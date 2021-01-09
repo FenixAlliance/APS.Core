@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 using FenixAlliance.ABM.Data;
 using FenixAlliance.ABM.Data.Access.Interfaces.DataHelpers;
 using FenixAlliance.ABM.Models.Logistics.Stock.Item;
-using FenixAlliance.Data.Access.DataAccess;
+using FenixAlliance.APS.Core.DataAccess;
 using FenixAlliance.Models.DTOs.Components.Global.Currencies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 
-namespace FenixAlliance.Data.Access.Helpers
+namespace FenixAlliance.APS.Core.DataHelpers
 {
     public class StoreHelpers : IStoreHelpers
     {

@@ -8,12 +8,12 @@ using FenixAlliance.ABM.Models.Holders;
 using FenixAlliance.ABM.Models.Social.SocialProfiles.Scopes;
 using FenixAlliance.ABM.Models.Tenants;
 using FenixAlliance.ABM.Models.Tenants.BusinessProfileRecords;
-using FenixAlliance.Data.Access.DataAccess;
+using FenixAlliance.APS.Core.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
-namespace FenixAlliance.Data.Access.Helpers
+namespace FenixAlliance.APS.Core.DataHelpers
 {
     public class BusinessHelpers : IBusinessHelpers
     {

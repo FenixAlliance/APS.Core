@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace FenixAlliance.Data.Access.Helpers
+namespace FenixAlliance.APS.Core.DataHelpers
 {
     public static class MongoHelpers
     {

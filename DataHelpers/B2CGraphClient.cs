@@ -9,7 +9,7 @@ using FenixAlliance.APS.Core.Models;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Newtonsoft.Json;
 
-namespace FenixAlliance.Data.Access.Helpers.AADB2C
+namespace FenixAlliance.APS.Core.DataHelpers
 {
     public class B2CGraphClient : IB2CGraphClient
     {

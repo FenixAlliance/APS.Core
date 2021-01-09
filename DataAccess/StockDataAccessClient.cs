@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 using FenixAlliance.ABM.Data;
 using FenixAlliance.ABM.Data.Access.Interfaces.DataAccess;
 using FenixAlliance.ABM.Models.Logistics.Stock.Item;
-using FenixAlliance.Data.Access.Helpers;
+using FenixAlliance.APS.Core.DataHelpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
-namespace FenixAlliance.Data.Access.DataAccess
+namespace FenixAlliance.APS.Core.DataAccess
 {
     public class StockDataAccessClient : IStockDataAccess
     {

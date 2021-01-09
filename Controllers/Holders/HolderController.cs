@@ -2,8 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using FenixAlliance.ABM.Data;
-using FenixAlliance.Data.Access.DataAccess;
-using FenixAlliance.Data.Access.Helpers;
+using FenixAlliance.APS.Core.DataAccess;
+using FenixAlliance.APS.Core.DataHelpers;
 using FenixAlliance.Models.Binders.Social;
 using FenixAlliance.Models.DTOs.Components.Businesses;
 using FenixAlliance.Models.DTOs.Components.ID;
@@ -16,7 +16,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
-using FollowRecord = FenixAlliance.Models.DTOs.Components.Social.FollowRecord;
 
 namespace FenixAlliance.APS.Core.Controllers.Holders
 {

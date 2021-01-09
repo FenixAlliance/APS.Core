@@ -10,7 +10,6 @@ using FenixAlliance.ABM.Data;
 using FenixAlliance.ABM.Models.Holders;
 using FenixAlliance.ABM.Models.Tenants;
 using FenixAlliance.ABM.SDK.Helpers;
-using FenixAlliance.Data.Access.Helpers.AADB2C;
 using FenixAlliance.Models.DTOs.Authorization;
 using FenixAlliance.Models.DTOs.Components.Businesses;
 using FenixAlliance.Models.DTOs.Components.Global.Currencies;
@@ -20,7 +19,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
-namespace FenixAlliance.Data.Access.Helpers
+namespace FenixAlliance.APS.Core.DataHelpers
 {
     public class APIHelpers
     {

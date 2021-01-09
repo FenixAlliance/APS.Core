@@ -9,12 +9,12 @@ using FenixAlliance.ABM.Models.Holders;
 using FenixAlliance.ABM.Models.Security.BusinessSecurityLogs;
 using FenixAlliance.ABM.Models.Social.SocialProfiles.Scopes;
 using FenixAlliance.ABM.Models.Tenants.BusinessProfileRecords;
-using FenixAlliance.Data.Access.Helpers;
+using FenixAlliance.APS.Core.DataHelpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
-namespace FenixAlliance.Data.Access.DataAccess
+namespace FenixAlliance.APS.Core.DataAccess
 {
     public partial class HolderDataAccessClient : IHolderDataAccess
     {

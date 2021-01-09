@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using FenixAlliance.ABM.Data;
-using FenixAlliance.Data.Access.DataAccess;
-using FenixAlliance.Data.Access.Helpers;
+using FenixAlliance.APS.Core.DataAccess;
+using FenixAlliance.APS.Core.DataHelpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;

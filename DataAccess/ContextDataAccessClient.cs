@@ -2,7 +2,7 @@
 using FenixAlliance.ABM.Data.Access.Interfaces.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace FenixAlliance.Data.Access.DataAccess
+namespace FenixAlliance.APS.Core.DataAccess
 {
     public class ContextDataAccessClient : IContextDataAccess
     {

@@ -6,8 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 
-
-namespace FenixAlliance.Data.Access.DataAccess
+namespace FenixAlliance.APS.Core.DataAccess
 {
     public class BlobStorageDataAccessClient : IBlobStorageDataAccessClient
     {

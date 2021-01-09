@@ -1,8 +1,7 @@
 ﻿using System.Threading.Tasks;
 using FenixAlliance.ABM.Data;
 using FenixAlliance.ABM.Data.Access.Interfaces.DataHelpers;
-using FenixAlliance.Data.Access.DataAccess;
-using FenixAlliance.Data.Access.Helpers;
+using FenixAlliance.APS.Core.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
 namespace FenixAlliance.APS.Core.DataHelpers

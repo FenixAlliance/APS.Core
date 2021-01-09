@@ -9,10 +9,9 @@ using FenixAlliance.ABM.Models.Global.Wallets.WalletAccountScopes;
 using FenixAlliance.ABM.Models.Holders;
 using FenixAlliance.ABM.Models.Social.SocialProfiles.Scopes;
 using FenixAlliance.APS.Core.Models;
-using FenixAlliance.Data.Access.Helpers.AADB2C;
 using Microsoft.EntityFrameworkCore;
 
-namespace FenixAlliance.Data.Access.Helpers
+namespace FenixAlliance.APS.Core.DataHelpers
 {
     public class AccountUsersHelpers : IAccountUsersHelpers
     {
