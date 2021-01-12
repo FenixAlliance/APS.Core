@@ -14,7 +14,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace FenixAlliance.APS.Core.DataAccess
 {
-    public class SocialDataAcessClient : ISocialDataAccess
+    public class SocialDataAccessClient : ISocialDataAccess
     {
         private readonly ABMContext _context;
         private AccountUsersHelpers AccountTools { get; set; }
@@ -23,7 +23,7 @@ namespace FenixAlliance.APS.Core.DataAccess
         private readonly IConfiguration _config;
         private readonly IHostEnvironment _env;
 
-        public SocialDataAcessClient(ABMContext context, IConfiguration AppConfiguration, IHostEnvironment HostingEnvironment)
+        public SocialDataAccessClient(ABMContext context, IConfiguration AppConfiguration, IHostEnvironment HostingEnvironment)
         {
             _context = context;
             _config = AppConfiguration;
@@ -33,7 +33,7 @@ namespace FenixAlliance.APS.Core.DataAccess
             AccountGraphTools = new AccountGraphHelpers(_context, _config);
         }
 
-        public SocialDataAcessClient(DbContextOptions<ABMContext> dbContextOptions, IConfiguration AppConfiguration, IHostEnvironment HostingEnvironment)
+        public SocialDataAccessClient(DbContextOptions<ABMContext> dbContextOptions, IConfiguration AppConfiguration, IHostEnvironment HostingEnvironment)
         {
             _context = new ABMContext(dbContextOptions);
             _config = AppConfiguration;

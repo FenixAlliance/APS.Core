@@ -12,10 +12,4 @@ namespace FenixAlliance.APS.Core.Models
         [JsonProperty("value")]
         public List<Value> Value { get; set; }
     }
-
-    public class Value
-    {
-        [JsonProperty("url")]
-        public Uri Url { get; set; }
-    }
 }

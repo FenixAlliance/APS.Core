@@ -1,4 +1,4 @@
-﻿using FenixAlliance.Options;
+﻿using FenixAlliance.ACL.Configuration.Types;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.AzureAD.UI;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -13,17 +13,17 @@ namespace FenixAlliance.APS.Core.Extensions
     public static class AlliancePassportServicesExtensions
     {
         public static void AddAlliancePassportServices(this IServiceCollection services, IConfiguration Configuration,
-            IHostEnvironment Environment, PlatformOptions Options)
+            IHostEnvironment Environment, SuiteOptions Options)
         {
 
             #region Auth
 
-            if (Options.Functionalities.AlliancePassportServices.Enable)
+            if (Options.APS.Enable)
             {
 
-                if (Options?.Functionalities?.AlliancePassportServices?.AzureAdb2C?.DefaultProvider ?? false)
+                if (Options?.APS?.AzureADB2C?.DefaultProvider ?? false)
                 {
-                    if (!Options?.Functionalities?.AlliancePassportServices?.AzureAd.DefaultProvider ?? false)
+                    if (!Options?.APS?.AzureAd.DefaultProvider ?? false)
                     {
                         // Adds Azure AD B2C Authentication
                         services.AddAuthentication(o =>
@@ -33,7 +33,7 @@ namespace FenixAlliance.APS.Core.Extensions
                         })
                         .AddAzureAdB2C(options =>
                             Configuration.Bind(
-                                $"Functionalities:AlliancePassportServices:{Options.Functionalities.AlliancePassportServices.Provider}",
+                                $"Functionalities:AlliancePassportServices:{Options.APS.Provider}",
                                 options))
                         //.AddAzureADB2CBearer(options => Configuration.Bind("AzureAdB2C", options))
                         //.AddCertificate();
@@ -43,13 +43,13 @@ namespace FenixAlliance.APS.Core.Extensions
                     }
                 }
 
-                if (Options?.Functionalities?.AlliancePassportServices?.AzureAd.DefaultProvider ?? false)
+                if (Options?.APS?.AzureAd.DefaultProvider ?? false)
                 {
-                    if (!Options?.Functionalities?.AlliancePassportServices?.AzureAdb2C?.DefaultProvider ?? false)
+                    if (!Options?.APS?.AzureADB2C?.DefaultProvider ?? false)
                     {
                         services.AddAuthentication(AzureADDefaults.AuthenticationScheme)
                             .AddAzureAD(options => Configuration.Bind(
-                                $"Functionalities:AlliancePassportServices:{Options.Functionalities.AlliancePassportServices.Provider}",
+                                $"Functionalities:AlliancePassportServices:{Options.APS.Provider}",
                                 options)).AddCookie();
                     }
                 }
@@ -58,7 +58,7 @@ namespace FenixAlliance.APS.Core.Extensions
             #endregion
 
             #region GDPR
-            if (Options.Functionalities.Gdpr.Enable)
+            if (Options.ABP.Privacy.Enable)
             {
                 // Adds Cookies Consent for GDPR Compliance
                 services.Configure<CookiePolicyOptions>(options =>
@@ -70,10 +70,10 @@ namespace FenixAlliance.APS.Core.Extensions
             }
             #endregion
         }
-        public static void UseAlliancePassportServices(this IApplicationBuilder app, IConfiguration Configuration, IHostEnvironment Environment, PlatformOptions Options)
+        public static void UseAlliancePassportServices(this IApplicationBuilder app, IConfiguration Configuration, IHostEnvironment Environment, SuiteOptions Options)
         {
 
-            if (Options.Functionalities.AlliancePassportServices.Enable)
+            if (Options.APS.Enable)
             {
                 app.UseAuthentication();
                 app.UseAuthorization();
