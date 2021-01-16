@@ -10,7 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace FenixAlliance.APS.Core.Extensions
 {
-    public static class AADB2CExtensions
+    public static class AzureADB2CAuthenticationBuilderExtensions
     {
         public static AuthenticationBuilder AddAzureAdB2C(this AuthenticationBuilder builder) => builder.AddAzureAdB2C(_ => { });
 
