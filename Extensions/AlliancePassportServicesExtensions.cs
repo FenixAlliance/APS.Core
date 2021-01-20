@@ -68,7 +68,7 @@ namespace FenixAlliance.APS.Core.Extensions
             }
             #endregion
         }
-        public static void UseAlliancePassportServices(this IApplicationBuilder app, IConfiguration Configuration, IHostEnvironment Environment, SuiteOptions Options)
+        public static void UseAlliancePassportServices(this IApplicationBuilder app, IConfiguration Configuration, IHostEnvironment Environment, ISuiteOptions Options)
         {
 
             if (Options.APS.Enable)
