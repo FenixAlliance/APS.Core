@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
-namespace FenixAlliance.ABS.SDK.Helpers
+namespace FenixAlliance.APS.Core.Helpers
 {
     public class EmailHelpers
     {
