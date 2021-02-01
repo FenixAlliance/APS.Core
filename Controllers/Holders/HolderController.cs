@@ -182,7 +182,7 @@ namespace FenixAlliance.APS.Core.Controllers.Holders
                 return Unauthorized(APIResponse?.Status);
             }
 
-            var Tenant = await DataContext.AllianceIDHolder
+            var Tenant = await DataContext.AccountHolder
                 // Include Business Profile Records
                 .Include(b => b.Country)
                 .Include(b => b.SocialProfile)
@@ -196,7 +196,7 @@ namespace FenixAlliance.APS.Core.Controllers.Holders
                 .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessPermissionGrants)
                     .ThenInclude(c => c.GrantorBusinessProfileRecord).ThenInclude(c => c.BusinessPermissionGrants).ThenInclude(c => c.BusinessPermission)
                 .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileDirectPermissionGrants).ThenInclude(c => c.BusinessPermission)
-                .Where(e => e.GUID == APIResponse.Holder.ID).FirstOrDefaultAsync().ConfigureAwait(false);
+                .Where(e => e.ID == APIResponse.Holder.ID).FirstOrDefaultAsync().ConfigureAwait(false);
 
 
 
@@ -271,7 +271,7 @@ namespace FenixAlliance.APS.Core.Controllers.Holders
                 return Unauthorized(APIResponse?.Status);
             }
 
-            var EndUser = await DataContext.AllianceIDHolder.Include(c => c.SocialProfile).ThenInclude(c => c.Notifications).FirstOrDefaultAsync(m => m.GUID == APIResponse.Holder.ID);
+            var EndUser = await DataContext.AccountHolder.Include(c => c.SocialProfile).ThenInclude(c => c.Notifications).FirstOrDefaultAsync(m => m.ID == APIResponse.Holder.ID);
 
             return Ok(NotificationBinder.ToDTO(EndUser.SocialProfile.Notifications));
         }

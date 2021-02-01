@@ -57,7 +57,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
 
         public async Task<string> GetSocialProfileType(string SocialProfileID)
         {
-            if (await DataContext.AllianceIDHolderSocialProfile.AnyAsync(c => c.ID == SocialProfileID))
+            if (await DataContext.AccountHolderSocialProfile.AnyAsync(c => c.ID == SocialProfileID))
             {
                 return "Holder";
             }

@@ -98,7 +98,7 @@ namespace FenixAlliance.APS.Core.DataAccess
             throw new NotImplementedException();
         }
 
-        public Task<AllianceIDHolderSocialProfile> GetHolderSocialProfile(string HolderGUID)
+        public Task<AccountHolderSocialProfile> GetHolderSocialProfile(string HolderGUID)
         {
             throw new NotImplementedException();
         }

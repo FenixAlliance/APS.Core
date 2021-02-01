@@ -42,14 +42,14 @@ namespace FenixAlliance.APS.Core.DataHelpers
                         var IdP_AccessToken = GetActiveDirectoryIdentityProviderToken(User);
 
                         // If user not exists in Database
-                        if (!_context.AllianceIDHolder.Any(c => c.GUID == GUID))
+                        if (!_context.AccountHolder.Any(c => c.ID == GUID))
                         {
                             try
                             {
                                 //Make Temp Object
-                                var Tenant = new AllianceIDHolder
+                                var Tenant = new AccountHolder
                                 {
-                                    GUID = GUID,
+                                    ID = GUID,
                                     PublicName = publicName,
                                     CountryID = CountryID,
                                     LastName = lastName,
@@ -57,13 +57,13 @@ namespace FenixAlliance.APS.Core.DataHelpers
                                     Email = email,
                                     IdentityProvider = identityProvider,
                                     NameIdentifier = nameIdentifier,
-                                    AllianceIDHolderWallet = new AllianceIDHolderWallet(),
-                                    AllianceIDHolderCart = new AllianceIDHolderCart(),
-                                    SocialProfile = new AllianceIDHolderSocialProfile(),
+                                    AccountHolderWallet = new AccountHolderWallet(),
+                                    AccountHolderCart = new AccountHolderCart(),
+                                    SocialProfile = new AccountHolderSocialProfile(),
                                 };
                                 // Adds default Currency
-                                Tenant.AllianceIDHolderCart.CurrencyID = "USD.USA";
-                                _context.AllianceIDHolder.Add(Tenant);
+                                Tenant.AccountHolderCart.CurrencyID = "USD.USA";
+                                _context.AccountHolder.Add(Tenant);
                                 _context.SaveChanges();
 
                             }
@@ -76,16 +76,16 @@ namespace FenixAlliance.APS.Core.DataHelpers
                         {
                             try
                             {
-                                var Tenant = _context.AllianceIDHolder.FirstOrDefault(c => c.GUID == GUID);
-                                Tenant.GUID = GUID;
-                                Tenant.PublicName = publicName;
-                                Tenant.CountryID = CountryID;
-                                Tenant.LastName = lastName;
-                                Tenant.Name = name;
-                                Tenant.Email = email;
-                                Tenant.IdentityProvider = identityProvider;
+                                var Holder = _context.AccountHolder.FirstOrDefault(c => c.ID == GUID);
+                                Holder.ID = GUID;
+                                Holder.PublicName = publicName;
+                                Holder.CountryID = CountryID;
+                                Holder.LastName = lastName;
+                                Holder.Name = name;
+                                Holder.Email = email;
+                                Holder.IdentityProvider = identityProvider;
                                 // Update
-                                _context.Update(Tenant);
+                                _context.Update(Holder);
                                 _context.SaveChanges();
                             }
                             catch (Exception ex)
@@ -120,14 +120,14 @@ namespace FenixAlliance.APS.Core.DataHelpers
                         var identityProvider = GetActiveDirectoryIdentityProvider(User);
 
                         // If user not exists in Database
-                        if (!await _context.AllianceIDHolder.AnyAsync(c => c.GUID == GUID))
+                        if (!await _context.AccountHolder.AnyAsync(c => c.ID == GUID))
                         {
                             try
                             {
                                 //Make Temp Object
-                                var Tenant = new AllianceIDHolder
+                                var Tenant = new AccountHolder
                                 {
-                                    GUID = GUID,
+                                    ID = GUID,
                                     PublicName = publicName,
                                     CountryID = CountryID,
                                     LastName = lastName,
@@ -135,12 +135,12 @@ namespace FenixAlliance.APS.Core.DataHelpers
                                     Email = email,
                                     IdentityProvider = identityProvider,
                                     NameIdentifier = nameIdentifier,
-                                    AllianceIDHolderCart = new AllianceIDHolderCart() { CurrencyID = "USD.USA" },
-                                    AllianceIDHolderWallet = new AllianceIDHolderWallet(),
-                                    SocialProfile = new AllianceIDHolderSocialProfile(),
+                                    AccountHolderCart = new AccountHolderCart() { CurrencyID = "USD.USA" },
+                                    AccountHolderWallet = new AccountHolderWallet(),
+                                    SocialProfile = new AccountHolderSocialProfile(),
                                 };
                                 // Adds default Currency
-                                await _context.AllianceIDHolder.AddAsync(Tenant);
+                                await _context.AccountHolder.AddAsync(Tenant);
                                 await _context.SaveChangesAsync();
 
                             }
@@ -153,16 +153,16 @@ namespace FenixAlliance.APS.Core.DataHelpers
                         {
                             try
                             {
-                                var Tenant = await _context.AllianceIDHolder.FirstOrDefaultAsync(c => c.GUID == GUID);
-                                Tenant.GUID = GUID;
-                                Tenant.PublicName = publicName;
-                                Tenant.CountryID = CountryID;
-                                Tenant.LastName = lastName;
-                                Tenant.Name = name;
-                                Tenant.Email = email;
-                                Tenant.IdentityProvider = identityProvider;
+                                var Holder = await _context.AccountHolder.FirstOrDefaultAsync(c => c.ID == GUID);
+                                Holder.ID = GUID;
+                                Holder.PublicName = publicName;
+                                Holder.CountryID = CountryID;
+                                Holder.LastName = lastName;
+                                Holder.Name = name;
+                                Holder.Email = email;
+                                Holder.IdentityProvider = identityProvider;
                                 // Update
-                                _context.Entry(Tenant).State = EntityState.Modified;
+                                _context.Entry(Holder).State = EntityState.Modified;
                                 await _context.SaveChangesAsync();
                             }
                             catch (Exception ex)
@@ -193,14 +193,14 @@ namespace FenixAlliance.APS.Core.DataHelpers
 
 
                 // If user not exists in Database
-                if (!_context.AllianceIDHolder.Any(c => c.GUID == GUID))
+                if (!_context.AccountHolder.Any(c => c.ID == GUID))
                 {
                     try
                     {
                         //Make Temp Object
-                        var Tenant = new AllianceIDHolder
+                        var Tenant = new AccountHolder
                         {
-                            GUID = GUID,
+                            ID = GUID,
                             Name = name,
                             Email = email,
                             LastName = lastName,
@@ -208,13 +208,13 @@ namespace FenixAlliance.APS.Core.DataHelpers
                             PublicName = publicName,
                             NameIdentifier = nameIdentifier,
                             IdentityProvider = identityProvider,
-                            AllianceIDHolderCart = new AllianceIDHolderCart(),
-                            SocialProfile = new AllianceIDHolderSocialProfile(),
-                            AllianceIDHolderWallet = new AllianceIDHolderWallet(),
+                            AccountHolderCart = new AccountHolderCart(),
+                            SocialProfile = new AccountHolderSocialProfile(),
+                            AccountHolderWallet = new AccountHolderWallet(),
                         };
                         // Adds default Currency
-                        Tenant.AllianceIDHolderCart.CurrencyID = "USD.USA";
-                        _context.AllianceIDHolder.Add(Tenant);
+                        Tenant.AccountHolderCart.CurrencyID = "USD.USA";
+                        _context.AccountHolder.Add(Tenant);
                         _context.SaveChanges();
 
                     }
@@ -227,16 +227,16 @@ namespace FenixAlliance.APS.Core.DataHelpers
                 {
                     try
                     {
-                        var Tenant = _context.AllianceIDHolder.FirstOrDefault(c => c.GUID == GUID);
-                        Tenant.GUID = GUID;
-                        Tenant.PublicName = publicName;
-                        Tenant.CountryID = CountryID;
-                        Tenant.LastName = lastName;
-                        Tenant.Name = name;
-                        Tenant.Email = email;
-                        Tenant.IdentityProvider = identityProvider;
+                        var Holder = _context.AccountHolder.FirstOrDefault(c => c.ID == GUID);
+                        Holder.ID = GUID;
+                        Holder.PublicName = publicName;
+                        Holder.CountryID = CountryID;
+                        Holder.LastName = lastName;
+                        Holder.Name = name;
+                        Holder.Email = email;
+                        Holder.IdentityProvider = identityProvider;
 
-                        _context.Entry(Tenant).State = EntityState.Modified;
+                        _context.Entry(Holder).State = EntityState.Modified;
 
                         _context.SaveChanges();
                     }
@@ -254,9 +254,9 @@ namespace FenixAlliance.APS.Core.DataHelpers
         /// </summary>
         /// <param name="User"></param>
         /// <returns></returns>
-        public async Task<AllianceIDHolder> GetCurrentHolder(ClaimsPrincipal User)
+        public async Task<AccountHolder> GetCurrentHolder(ClaimsPrincipal User)
         {
-            AllianceIDHolder Response = null;
+            AccountHolder Response = null;
             if (User.Identity.IsAuthenticated)
             {
                 //CheckValues
@@ -274,15 +274,15 @@ namespace FenixAlliance.APS.Core.DataHelpers
                         var CountryID = GetCountryID(country) ?? "USA";
                         var identityProvider = GetActiveDirectoryIdentityProvider(User);
 
-                        if (!await _context.AllianceIDHolder.AnyAsync(c => c.GUID == GUID))
+                        if (!await _context.AccountHolder.AnyAsync(c => c.ID == GUID))
                         {
                             // If user not exists in Database
                             try
                             {
                                 //Make Temp Object
-                                Response = new AllianceIDHolder
+                                Response = new AccountHolder
                                 {
-                                    GUID = GUID,
+                                    ID = GUID,
                                     PublicName = publicName,
                                     CountryID = CountryID,
                                     LastName = lastName,
@@ -290,19 +290,19 @@ namespace FenixAlliance.APS.Core.DataHelpers
                                     Email = email,
                                     IdentityProvider = identityProvider,
                                     NameIdentifier = nameIdentifier,
-                                    AllianceIDHolderWallet = new AllianceIDHolderWallet(),
-                                    AllianceIDHolderCart = new AllianceIDHolderCart() { CurrencyID = "USD.USA" },
-                                    SocialProfile = new AllianceIDHolderSocialProfile(),
+                                    AccountHolderWallet = new AccountHolderWallet(),
+                                    AccountHolderCart = new AccountHolderCart() { CurrencyID = "USD.USA" },
+                                    SocialProfile = new AccountHolderSocialProfile(),
                                 };
                                 // Adds default Currency
-                                await _context.AllianceIDHolder.AddAsync(Response);
+                                await _context.AccountHolder.AddAsync(Response);
                                 await _context.SaveChangesAsync();
 
                                 // Get the full data object
-                                Response = await _context.AllianceIDHolder
+                                Response = await _context.AccountHolder
                                          .Include(c => c.SocialProfile)
-                                         .Include(c => c.AllianceIDHolderWallet)
-                                         .Include(c => c.AllianceIDHolderCart).ThenInclude(c => c.Currency)
+                                         .Include(c => c.AccountHolderWallet)
+                                         .Include(c => c.AccountHolderCart).ThenInclude(c => c.Currency)
                                          .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessSocialProfile)
                                          .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessWallet)
                                          .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessCart).ThenInclude(c => c.Currency)
@@ -310,7 +310,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
                                          .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileSecurityRoleGrants)
                                                 .ThenInclude(c => c.BusinessSecurityRole).ThenInclude(c => c.BusinessRolePermissionGrants).ThenInclude(c => c.BusinessPermission)
                                          .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileDirectPermissionGrants).ThenInclude(c => c.BusinessPermission)
-                                         .FirstOrDefaultAsync(c => c.GUID == GUID);
+                                         .FirstOrDefaultAsync(c => c.ID == GUID);
 
                             }
                             catch (Exception ex)
@@ -323,10 +323,10 @@ namespace FenixAlliance.APS.Core.DataHelpers
                             // If user already exists
                             try
                             {
-                                Response = await _context.AllianceIDHolder
+                                Response = await _context.AccountHolder
                                     .Include(c => c.SocialProfile)
-                                    .Include(c => c.AllianceIDHolderWallet)
-                                    .Include(c => c.AllianceIDHolderCart).ThenInclude(c => c.Currency)
+                                    .Include(c => c.AccountHolderWallet)
+                                    .Include(c => c.AccountHolderCart).ThenInclude(c => c.Currency)
                                     .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessSocialProfile)
                                     .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessWallet)
                                     .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessCart).ThenInclude(c => c.Currency)
@@ -334,9 +334,9 @@ namespace FenixAlliance.APS.Core.DataHelpers
                                     .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileSecurityRoleGrants)
                                         .ThenInclude(c => c.BusinessSecurityRole).ThenInclude(c => c.BusinessRolePermissionGrants).ThenInclude(c => c.BusinessPermission)
                                     .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileDirectPermissionGrants).ThenInclude(c => c.BusinessPermission)
-                                    .FirstOrDefaultAsync(c => c.GUID == GUID);
+                                    .FirstOrDefaultAsync(c => c.ID == GUID);
 
-                                Response.GUID = GUID;
+                                Response.ID = GUID;
                                 Response.PublicName = publicName;
                                 Response.CountryID = CountryID;
                                 Response.LastName = lastName;
@@ -344,9 +344,9 @@ namespace FenixAlliance.APS.Core.DataHelpers
                                 Response.Email = email;
                                 Response.IdentityProvider = identityProvider;
 
-                                if (Response.AllianceIDHolderCart == null)
+                                if (Response.AccountHolderCart == null)
                                 {
-                                    Response.AllianceIDHolderCart = new AllianceIDHolderCart() { CurrencyID = "USD.USA" };
+                                    Response.AccountHolderCart = new AccountHolderCart() { CurrencyID = "USD.USA" };
                                 }
 
                                 if (String.IsNullOrEmpty(Response.CountryID))
@@ -356,7 +356,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
 
                                 if (Response.SocialProfile == null)
                                 {
-                                    Response.SocialProfile = new AllianceIDHolderSocialProfile();
+                                    Response.SocialProfile = new AccountHolderSocialProfile();
                                 }
 
                                 if (Response.SelectedBusiness != null)
@@ -596,33 +596,33 @@ namespace FenixAlliance.APS.Core.DataHelpers
             }
         }
 
-        public async Task<AllianceIDHolder> GetTenantSocialProfileAsync(string GUID)
+        public async Task<AccountHolder> GetTenantSocialProfileAsync(string GUID)
         {
             // Get Alliance ID Tenant from DB
-            var Tenant = await _context.AllianceIDHolder
+            var Tenant = await _context.AccountHolder
                 // Add Country
                 .Include(c => c.Country)
                 .Include(c => c.SocialProfile)
-                .Include(c => c.AllianceIDHolderCart)
+                .Include(c => c.AccountHolderCart)
                 .Include(c => c.PersonaPartnerProfile)
                 // Add Business I Work for
                 .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.Business)
                 .Include(c => c.SelectedBusiness).ThenInclude(c => c.Country)
                 // Add users that I Follow
-                .Include(c => c.SocialProfile).ThenInclude(c => c.Follows).ThenInclude(c => ((AllianceIDHolderSocialProfile)c.FollowedSocialProfile).AllianceIDHolder).ThenInclude(c => c.Country)
+                .Include(c => c.SocialProfile).ThenInclude(c => c.Follows).ThenInclude(c => ((AccountHolderSocialProfile)c.FollowedSocialProfile).AccountHolder).ThenInclude(c => c.Country)
                 .Include(c => c.SocialProfile).ThenInclude(c => c.Follows).ThenInclude(c => ((BusinessSocialProfile)c.FollowedSocialProfile).Business).ThenInclude(c => c.Country)
                 .Include(c => c.SocialProfile).ThenInclude(c => c.Follows).ThenInclude(c => ((BusinessSocialProfile)c.FollowedSocialProfile).Business).ThenInclude(c => c.BusinessType)
                 .Include(c => c.SocialProfile).ThenInclude(c => c.Follows).ThenInclude(c => ((BusinessSocialProfile)c.FollowedSocialProfile).Business).ThenInclude(c => c.BusinessIndustry)
                 .Include(c => c.SocialProfile).ThenInclude(c => c.Follows).ThenInclude(c => ((ContactSocialProfile)c.FollowedSocialProfile).Contact).ThenInclude(c => c.Country)
                 // Add Business that I Follow
-                .Include(c => c.SocialProfile).ThenInclude(c => c.Followers).ThenInclude(c => ((AllianceIDHolderSocialProfile)c.FollowerSocialProfile).AllianceIDHolder).ThenInclude(c => c.Country)
+                .Include(c => c.SocialProfile).ThenInclude(c => c.Followers).ThenInclude(c => ((AccountHolderSocialProfile)c.FollowerSocialProfile).AccountHolder).ThenInclude(c => c.Country)
                 .Include(c => c.SocialProfile).ThenInclude(c => c.Followers).ThenInclude(c => ((BusinessSocialProfile)c.FollowerSocialProfile).Business).ThenInclude(c => c.Country)
                 .Include(c => c.SocialProfile).ThenInclude(c => c.Followers).ThenInclude(c => ((BusinessSocialProfile)c.FollowerSocialProfile).Business).ThenInclude(c => c.BusinessType)
                 .Include(c => c.SocialProfile).ThenInclude(c => c.Followers).ThenInclude(c => ((BusinessSocialProfile)c.FollowerSocialProfile).Business).ThenInclude(c => c.BusinessIndustry)
                 .Include(c => c.SocialProfile).ThenInclude(c => c.Followers).ThenInclude(c => ((ContactSocialProfile)c.FollowerSocialProfile).Contact).ThenInclude(c => c.Country)
                 // Social Comments
                 .Include(c => c.SocialProfile).ThenInclude(c => c.SocialPosts).ThenInclude(c => c.SocialComments).ThenInclude(c => ((BusinessSocialProfile)c.OwnerSocialProfile).Business).ThenInclude(c => c.Country)
-                .Include(c => c.SocialProfile).ThenInclude(c => c.SocialPosts).ThenInclude(c => c.SocialComments).ThenInclude(c => ((AllianceIDHolderSocialProfile)c.OwnerSocialProfile).AllianceIDHolder).ThenInclude(c => c.Country)
+                .Include(c => c.SocialProfile).ThenInclude(c => c.SocialPosts).ThenInclude(c => c.SocialComments).ThenInclude(c => ((AccountHolderSocialProfile)c.OwnerSocialProfile).AccountHolder).ThenInclude(c => c.Country)
                 .Include(c => c.SocialProfile).ThenInclude(c => c.SocialPosts).ThenInclude(c => c.SocialComments).ThenInclude(c => ((ContactSocialProfile)c.OwnerSocialProfile).Contact).ThenInclude(c => c.Country)
                 // Groups
                 .Include(c => c.SocialProfile).ThenInclude(c => c.SocialPosts).ThenInclude(c => c.SocialPostReactions)
@@ -630,12 +630,12 @@ namespace FenixAlliance.APS.Core.DataHelpers
                 .Include(c => c.SocialProfile).ThenInclude(c => c.GroupMembershipRecords).ThenInclude(c => c.Group)
                 // Add My Groups
                 .Include(c => c.SocialProfile).ThenInclude(c => c.GroupMembershipRecords).ThenInclude(c => c.Group).ThenInclude(c => c.SocialGroupEnrollmentRecords).ThenInclude(c => ((BusinessSocialProfile)c.SocialProfile).Business).ThenInclude(c => c.Country)
-                .Include(c => c.SocialProfile).ThenInclude(c => c.GroupMembershipRecords).ThenInclude(c => c.Group).ThenInclude(c => c.SocialGroupEnrollmentRecords).ThenInclude(c => ((AllianceIDHolderSocialProfile)c.SocialProfile).AllianceIDHolder).ThenInclude(c => c.Country)
+                .Include(c => c.SocialProfile).ThenInclude(c => c.GroupMembershipRecords).ThenInclude(c => c.Group).ThenInclude(c => c.SocialGroupEnrollmentRecords).ThenInclude(c => ((AccountHolderSocialProfile)c.SocialProfile).AccountHolder).ThenInclude(c => c.Country)
                 .Include(c => c.SocialProfile).ThenInclude(c => c.GroupMembershipRecords).ThenInclude(c => c.Group).ThenInclude(c => c.GroupSocialPosts).ThenInclude(c => c.SocialPostReactions)
                 .Include(c => c.SocialProfile).ThenInclude(c => c.GroupMembershipRecords).ThenInclude(c => c.Group).ThenInclude(c => c.GroupSocialPosts).ThenInclude(c => c.SociaPostAttachments)
                 .Include(c => c.SocialProfile).ThenInclude(c => c.GroupMembershipRecords).ThenInclude(c => c.Group).ThenInclude(c => c.GroupSocialPosts).ThenInclude(c => c.SocialComments).ThenInclude(c => c.ChildComments)
                 // Where Current User
-                .FirstOrDefaultAsync(m => m.GUID == GUID);
+                .FirstOrDefaultAsync(m => m.ID == GUID);
             return Tenant;
         }
     }

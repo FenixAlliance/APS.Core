@@ -29,7 +29,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
             return _accountUsersHelpers.GetAndRegisterGUIDByToken(DecodedToken);
         }
 
-        public static async Task<Holder> GetAllianceIDHolderByTokenAsync(string Token)
+        public static async Task<Holder> GetAccountHolderByTokenAsync(string Token)
         {
             var DecodedToken = await AccountOAuthHelpers.DecodeAndValidateOAuthTokenAsync(Token);
 

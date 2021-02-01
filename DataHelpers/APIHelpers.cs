@@ -26,7 +26,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
         public static async Task<APIResponse> BindAPIBaseResponse(ABMContext _context, HttpContext _httpContext, HttpRequest _request, AccountUsersHelpers AccountTools, ClaimsPrincipal _user, string TenantID = "", List<string> RequiredPermissions = null, List<string> RequiredRoles = null, bool EnforceBusinessResponse = false)
         {
             Business Business = null;
-            AllianceIDHolder AllianceIDHolder;
+            AccountHolder AccountHolder;
             string EnrollmentID;
             string HolderID;
 
@@ -115,7 +115,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
                             TenantID = Payload.act;
 
 
-                            var RequestedBPR = await _context.BusinessProfileRecord.Include(c => c.AllianceIDHolder).AsNoTracking().Where(c => c.ID == EnrollmentID).FirstAsync();
+                            var RequestedBPR = await _context.BusinessProfileRecord.Include(c => c.AccountHolder).AsNoTracking().Where(c => c.ID == EnrollmentID).FirstAsync();
 
 
                             if (RequestedBPR == null)
@@ -162,7 +162,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
                                 GrantedPermissions = Payload.Scopes
                             };
 
-                            HolderID = RequestedBPR.AllianceIDHolder.GUID;
+                            HolderID = RequestedBPR.AccountHolder.ID;
                         }
                         catch
                         {
@@ -177,12 +177,12 @@ namespace FenixAlliance.APS.Core.DataHelpers
                 }
 
 
-                AllianceIDHolder = await _context.AllianceIDHolder
+                AccountHolder = await _context.AccountHolder
                         .Include(c => c.Country)
                         .Include(c => c.SocialProfile)
-                        .Include(c => c.AllianceIDHolderWallet)
+                        .Include(c => c.AccountHolderWallet)
                         .Include(c => c.BusinessProfileRecords)
-                        .Include(c => c.AllianceIDHolderCart).ThenInclude(c => c.Currency).ThenInclude(c => c.Country)
+                        .Include(c => c.AccountHolderCart).ThenInclude(c => c.Currency).ThenInclude(c => c.Country)
                         // Partner Profile
                         .Include(c => c.PersonaPartnerProfile)
                         .Include(c => c.SocialProfile).ThenInclude(c => c.Followers)
@@ -202,11 +202,11 @@ namespace FenixAlliance.APS.Core.DataHelpers
                         // Add Current Business
                         .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessSocialProfile).ThenInclude(c => c.Follows)
                         .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessSocialProfile).ThenInclude(c => c.Followers)
-                .FirstOrDefaultAsync(c => c.GUID == HolderID);
+                .FirstOrDefaultAsync(c => c.ID == HolderID);
 
                 if (String.IsNullOrEmpty(TenantID))
                 {
-                    TenantID = AllianceIDHolder.SelectedBusinessID;
+                    TenantID = AccountHolder.SelectedBusinessID;
                 }
 
                 if (!String.IsNullOrEmpty(TenantID))
@@ -240,35 +240,35 @@ namespace FenixAlliance.APS.Core.DataHelpers
                     .FirstOrDefaultAsync(c => c.ID == TenantID);
                 }
 
-                if (AllianceIDHolder != null)
+                if (AccountHolder != null)
                 {
-                    Response.Holder.ID = AllianceIDHolder.GUID;
-                    Response.Holder.CartID = AllianceIDHolder.AllianceIDHolderCart.ID;
-                    Response.Holder.AvatarURL = AllianceIDHolder.AvatarURL;
-                    Response.Holder.CoverURL = AllianceIDHolder.ProfileCoverURL;
-                    Response.Holder.FacebookURL = AllianceIDHolder.FacebookURL;
-                    Response.Holder.TwitterURL = AllianceIDHolder.GithubURL;
-                    Response.Holder.InstagramURL = AllianceIDHolder.InstagramURL;
-                    Response.Holder.YouTubeURL = AllianceIDHolder.YouTubeURL;
-                    Response.Holder.WebsiteURL = AllianceIDHolder.WebURL;
-                    Response.Holder.LinkedInURL = AllianceIDHolder.LinkedInURL;
-                    Response.Holder.GitHubURL = AllianceIDHolder.GithubURL;
-                    Response.Holder.About = AllianceIDHolder.About;
-                    Response.Holder.Email = AllianceIDHolder.Email;
-                    Response.Holder.PublicName = AllianceIDHolder.PublicName;
-                    Response.Holder.CountryID = AllianceIDHolder.Country.ISOAlpha3;
-                    Response.Holder.CurrencyID = AllianceIDHolder.AllianceIDHolderCart.CurrencyID;
-                    Response.Holder.IdProvider = AllianceIDHolder.IdentityProvider;
-                    Response.Holder.CurrencyID = AllianceIDHolder.AllianceIDHolderCart.Currency.ISOCode;
-                    Response.Holder.SocialProfileID = AllianceIDHolder.SocialProfile.ID;
-                    Response.Holder.EnrollmentsCount = AllianceIDHolder.BusinessProfileRecords.Count;
-                    Response.Holder.WalletID = AllianceIDHolder.AllianceIDHolderWallet.ID;
-                    Response.Holder.FollowsCount = AllianceIDHolder.SocialProfile.Follows.Count;
-                    Response.Holder.FollowersCount = AllianceIDHolder.SocialProfile.Followers.Count;
-                    Response.Holder.CurrencyISO = AllianceIDHolder.AllianceIDHolderCart.Currency.ISOCode ?? "USD";
-                    Response.Holder.CurrencyID = AllianceIDHolder.AllianceIDHolderCart.Currency.ID ?? "USD.USA";
-                    Response.Holder.CountryFlag = AllianceIDHolder.Country.CountryFlagUrl;
-                    Response.Holder.CurrencyExchange = ExchangeRates.Rates.First(c=>c.Key == (AllianceIDHolder.AllianceIDHolderCart.Currency.ISOCode ?? "USD")).Value;
+                    Response.Holder.ID = AccountHolder.ID;
+                    Response.Holder.CartID = AccountHolder.AccountHolderCart.ID;
+                    Response.Holder.AvatarURL = AccountHolder.AvatarURL;
+                    Response.Holder.CoverURL = AccountHolder.ProfileCoverURL;
+                    Response.Holder.FacebookURL = AccountHolder.FacebookURL;
+                    Response.Holder.TwitterURL = AccountHolder.GithubURL;
+                    Response.Holder.InstagramURL = AccountHolder.InstagramURL;
+                    Response.Holder.YouTubeURL = AccountHolder.YouTubeURL;
+                    Response.Holder.WebsiteURL = AccountHolder.WebURL;
+                    Response.Holder.LinkedInURL = AccountHolder.LinkedInURL;
+                    Response.Holder.GitHubURL = AccountHolder.GithubURL;
+                    Response.Holder.About = AccountHolder.About;
+                    Response.Holder.Email = AccountHolder.Email;
+                    Response.Holder.PublicName = AccountHolder.PublicName;
+                    Response.Holder.CountryID = AccountHolder.Country.ISOAlpha3;
+                    Response.Holder.CurrencyID = AccountHolder.AccountHolderCart.CurrencyID;
+                    Response.Holder.IdProvider = AccountHolder.IdentityProvider;
+                    Response.Holder.CurrencyID = AccountHolder.AccountHolderCart.Currency.ISOCode;
+                    Response.Holder.SocialProfileID = AccountHolder.SocialProfile.ID;
+                    Response.Holder.EnrollmentsCount = AccountHolder.BusinessProfileRecords.Count;
+                    Response.Holder.WalletID = AccountHolder.AccountHolderWallet.ID;
+                    Response.Holder.FollowsCount = AccountHolder.SocialProfile.Follows.Count;
+                    Response.Holder.FollowersCount = AccountHolder.SocialProfile.Followers.Count;
+                    Response.Holder.CurrencyISO = AccountHolder.AccountHolderCart.Currency.ISOCode ?? "USD";
+                    Response.Holder.CurrencyID = AccountHolder.AccountHolderCart.Currency.ID ?? "USD.USA";
+                    Response.Holder.CountryFlag = AccountHolder.Country.CountryFlagUrl;
+                    Response.Holder.CurrencyExchange = ExchangeRates.Rates.First(c=>c.Key == (AccountHolder.AccountHolderCart.Currency.ISOCode ?? "USD")).Value;
                 }
 
                 if (Business != null)
@@ -295,7 +295,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
                         IsBuinessPartner = (Business.BusinessPartnerProfile == null),
                         IsA4StartupsPartner = (Business.StartupsPartnerProfile == null),
                         Name = Business.BusinessName,
-                        TwitterURL = AllianceIDHolder.TwitterURL,
+                        TwitterURL = AccountHolder.TwitterURL,
                         CartID = Business.BusinessCart.ID,
                         CountryName = Business.Country.Name,
                         LegalName = Business.BusinessLegalName,
@@ -313,10 +313,10 @@ namespace FenixAlliance.APS.Core.DataHelpers
                         CurrencyCountryID = Business.BusinessCart.Currency.Country.ISOAlpha3,
                         CurrencyExchangeRateTimestamp = Settings.ExchangeRatesUpdatedTimestamp,
                         CurrencyCountryFlagURL = Business.BusinessCart.Currency.Country.CountryFlagUrl,
-                        EnrollmentID = AllianceIDHolder.BusinessProfileRecords.First(c => c.BusinessID == TenantID)?.ID,
+                        EnrollmentID = AccountHolder.BusinessProfileRecords.First(c => c.BusinessID == TenantID)?.ID,
                         CurrencyExchangeRate = ExchangeRates.Rates.First(c => c.Key == Business.BusinessCart.Currency.ISOCode).Value,
-                        B2CFollowID = Business.BusinessSocialProfile.Follows.FirstOrDefault(c => c.FollowedSocialProfileID == AllianceIDHolder.SocialProfile.ID)?.ID,
-                        C2BFollowID = Business.BusinessSocialProfile.Followers.FirstOrDefault(c => c.FollowerSocialProfileID == AllianceIDHolder.SocialProfile.ID)?.ID
+                        B2CFollowID = Business.BusinessSocialProfile.Follows.FirstOrDefault(c => c.FollowedSocialProfileID == AccountHolder.SocialProfile.ID)?.ID,
+                        C2BFollowID = Business.BusinessSocialProfile.Followers.FirstOrDefault(c => c.FollowerSocialProfileID == AccountHolder.SocialProfile.ID)?.ID
                     };
                 }
             }

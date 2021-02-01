@@ -13,10 +13,8 @@ namespace FenixAlliance.APS.Core.Extensions
 {
     public static class AlliancePassportServicesExtensions
     {
-        public static void AddAlliancePassportServices(this IServiceCollection services, IConfiguration Configuration,
-            IHostEnvironment Environment, ISuiteOptions Options)
+        public static void AddAlliancePassportServices(this IServiceCollection services, IConfiguration Configuration, IHostEnvironment Environment, ISuiteOptions Options)
         {
-
             #region Auth
 
             if (Options.APS.Enable)
@@ -32,7 +30,10 @@ namespace FenixAlliance.APS.Core.Extensions
                             o.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                             o.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
                         })
-                        .AddAzureAdB2C(options => Configuration.Bind($"APS:{Options.APS.Provider}", options))
+                        .AddAzureAdB2C(options =>
+                        {
+                            Configuration.Bind($"APS:{Options.APS.Provider}", options);
+                        })
                         //.AddAzureADB2CBearer(options => Configuration.Bind("AzureAdB2C", options))
                         //.AddCertificate();
                         .AddCookie();

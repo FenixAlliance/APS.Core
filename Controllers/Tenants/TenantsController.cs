@@ -224,19 +224,19 @@ namespace FenixAlliance.APS.Core.Controllers.Tenants
             var GUID = AccountUsersHelpers.GetActiveDirectoryGUID(User);
 
             // If no BPR, not authorized.
-            var BPR = await DataContext.BusinessProfileRecord.AsNoTracking().Where(c => c.AllianceIDHolderGUID == GUID && c.BusinessID == TenantID).FirstAsync();
+            var BPR = await DataContext.BusinessProfileRecord.AsNoTracking().Where(c => c.AccountHolderGUID == GUID && c.BusinessID == TenantID).FirstAsync();
             if (BPR == null)
             {
                 return Unauthorized();
             }
 
-            var Tenant = await DataContext.AllianceIDHolder
+            var Tenant = await DataContext.AccountHolder
                 // Load Business Owner Data
                 .Include(b => b.BusinessProfileRecords).ThenInclude(c => c.Business)
                   .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileSecurityRoleGrants)
                     .ThenInclude(c => c.BusinessSecurityRole).ThenInclude(c => c.BusinessRolePermissionGrants).ThenInclude(c => c.BusinessPermission)
                 .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileDirectPermissionGrants).ThenInclude(c => c.BusinessPermission)
-                .Where(e => e.GUID == GUID).FirstOrDefaultAsync();
+                .Where(e => e.ID == GUID).FirstOrDefaultAsync();
 
             // Load requested business data
             var business = await DataContext.Business.AsNoTracking().FirstOrDefaultAsync(m => m.ID == TenantID);
@@ -306,7 +306,7 @@ namespace FenixAlliance.APS.Core.Controllers.Tenants
             }
 
             var GUID = APIResponse.Holder.ID;
-            var Tenant = await DataContext.AllianceIDHolder.Where(e => e.GUID == GUID).FirstOrDefaultAsync();
+            var Tenant = await DataContext.AccountHolder.Where(e => e.ID == GUID).FirstOrDefaultAsync();
 
             Tenant.SelectedBusinessID = null;
             Tenant.SelectedBusinessAs = null;
@@ -359,7 +359,7 @@ namespace FenixAlliance.APS.Core.Controllers.Tenants
                 return Unauthorized(APIResponse?.Status);
             }
 
-            var EndUser = await DataContext.AllianceIDHolder.AsNoTracking().Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessSocialProfile).ThenInclude(c => c.Notifications).FirstOrDefaultAsync(m => m.GUID == APIResponse.Holder.ID);
+            var EndUser = await DataContext.AccountHolder.AsNoTracking().Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessSocialProfile).ThenInclude(c => c.Notifications).FirstOrDefaultAsync(m => m.ID == APIResponse.Holder.ID);
 
             return Ok(NotificationBinder.ToDTO(EndUser.SelectedBusiness.BusinessSocialProfile.Notifications));
         }
@@ -376,7 +376,7 @@ namespace FenixAlliance.APS.Core.Controllers.Tenants
                 return Unauthorized(APIResponse?.Status);
             }
 
-            var Holder = await DataContext.AllianceIDHolder
+            var Holder = await DataContext.AccountHolder
                 // Include Business Profile Records
                 .Include(b => b.Country)
                 // Include Business Profile Records
@@ -390,7 +390,7 @@ namespace FenixAlliance.APS.Core.Controllers.Tenants
                 .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileSecurityRoleGrants)
                     .ThenInclude(c => c.BusinessSecurityRole).ThenInclude(c => c.BusinessRolePermissionGrants).ThenInclude(c => c.BusinessPermission)
                 .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileDirectPermissionGrants).ThenInclude(c => c.BusinessPermission)
-                .Where(e => e.GUID == APIResponse.Holder.ID).FirstOrDefaultAsync().ConfigureAwait(false);
+                .Where(e => e.ID == APIResponse.Holder.ID).FirstOrDefaultAsync().ConfigureAwait(false);
 
             BusinessDataAccess.ResolveRequestedAccess(Holder, null, new List<string>() { "business_owner" });
 

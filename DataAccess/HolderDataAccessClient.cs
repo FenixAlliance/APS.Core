@@ -56,19 +56,19 @@ namespace FenixAlliance.APS.Core.DataAccess
             return await AccountTools.GetActiveDirectoryGUIDAsync(CurrentUser);
         }
 
-        public Task<AllianceIDHolder> GetHolder(string HolderGUID, bool TrackEntity = false)
+        public Task<AccountHolder> GetHolder(string HolderGUID, bool TrackEntity = false)
         {
             if (TrackEntity == true)
             {
-                return _context.AllianceIDHolder.Include(c => c.SelectedBusiness).FirstAsync(c => c.GUID == HolderGUID);
+                return _context.AccountHolder.Include(c => c.SelectedBusiness).FirstAsync(c => c.ID == HolderGUID);
             }
             else
             {
-                return _context.AllianceIDHolder.Include(c => c.SelectedBusiness).AsNoTracking().FirstAsync(c => c.GUID == HolderGUID);
+                return _context.AccountHolder.Include(c => c.SelectedBusiness).AsNoTracking().FirstAsync(c => c.ID == HolderGUID);
             }
         }
 
-        public async Task UpdateHolder(AllianceIDHolder Holder)
+        public async Task UpdateHolder(AccountHolder Holder)
         {
             _context.Update(Holder);
             try
@@ -83,10 +83,10 @@ namespace FenixAlliance.APS.Core.DataAccess
 
         public async Task<BusinessProfileRecord> GetCurrentBPR(string HolderGUID)
         {
-            var User = await _context.AllianceIDHolder.AsNoTracking()
+            var User = await _context.AccountHolder.AsNoTracking()
                 .Include(c => c.BusinessProfileRecords)
                 .Include(c => c.SelectedBusiness)
-            .FirstOrDefaultAsync(c => c.GUID == HolderGUID);
+            .FirstOrDefaultAsync(c => c.ID == HolderGUID);
 
             if (User.SelectedBusiness == null)
             {
@@ -97,34 +97,34 @@ namespace FenixAlliance.APS.Core.DataAccess
         }
 
 
-        public async Task<AllianceIDHolder> GetFullHolderAndBusiness(ClaimsPrincipal CurrentUser)
+        public async Task<AccountHolder> GetFullHolderAndBusiness(ClaimsPrincipal CurrentUser)
         {
             var HolderGUID = await GetCurrentHolderGUIDAsync(CurrentUser);
             return await GetFullHolderAndBusiness(HolderGUID);
         }
 
 
-        public async Task<AllianceIDHolder> GetFullHolderAndBusiness(ClaimsPrincipal CurrentUser, string BusinessID)
+        public async Task<AccountHolder> GetFullHolderAndBusiness(ClaimsPrincipal CurrentUser, string BusinessID)
         {
             var HolderGUID = await GetCurrentHolderGUIDAsync(CurrentUser);
             return await GetFullHolderAndBusiness(HolderGUID, BusinessID);
         }
 
-        public async Task<AllianceIDHolder> GetFullHolderAndBusiness(string HolderGUID)
+        public async Task<AccountHolder> GetFullHolderAndBusiness(string HolderGUID)
         {
-            return await _context.AllianceIDHolder
+            return await _context.AccountHolder
                 .AsNoTracking()
                 // Tenant Data
                 .Include(c => c.Country)
-                .Include(c => c.AllianceIDHolderCart)//.ThenInclude(c => c.Currency)
+                .Include(c => c.AccountHolderCart)//.ThenInclude(c => c.Currency)
                 .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.Business)
                 // Social Data
                 // Add Follows
-                .Include(c => c.SocialProfile).ThenInclude(c => c.Follows)//.ThenInclude(c => ((AllianceIDHolderSocialProfile)c.FollowedSocialProfile).AllianceIDHolder).ThenInclude(c => c.Country)
+                .Include(c => c.SocialProfile).ThenInclude(c => c.Follows)//.ThenInclude(c => ((AccountHolderSocialProfile)c.FollowedSocialProfile).AccountHolder).ThenInclude(c => c.Country)
                 //.Include(c => c.SocialProfile).ThenInclude(c => c.Follows)//.ThenInclude(c => ((BusinessSocialProfile)c.FollowedSocialProfile).Business).ThenInclude(c => c.Country)
                 //.Include(c => c.SocialProfile).ThenInclude(c => c.Follows)//.ThenInclude(c => ((ContactSocialProfile)c.FollowedSocialProfile).Contact).ThenInclude(c => c.Country)
                 // Add Followers
-                .Include(c => c.SocialProfile).ThenInclude(c => c.Followers)//.ThenInclude(c => ((AllianceIDHolderSocialProfile)c.FollowedSocialProfile).AllianceIDHolder).ThenInclude(c => c.Country)
+                .Include(c => c.SocialProfile).ThenInclude(c => c.Followers)//.ThenInclude(c => ((AccountHolderSocialProfile)c.FollowedSocialProfile).AccountHolder).ThenInclude(c => c.Country)
                 //.Include(c => c.SocialProfile).ThenInclude(c => c.Followers).ThenInclude(c => ((BusinessSocialProfile)c.FollowedSocialProfile).Business).ThenInclude(c => c.Country)
                 //.Include(c => c.SocialProfile).ThenInclude(c => c.Followers).ThenInclude(c => ((ContactSocialProfile)c.FollowedSocialProfile).Contact).ThenInclude(c => c.Country)
                 // Businesses Data
@@ -133,33 +133,33 @@ namespace FenixAlliance.APS.Core.DataAccess
                 .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessCart)
                 // Businesses Social Data
                 // Add Follows
-                .Include(x => x.SelectedBusiness).ThenInclude(c => c.BusinessSocialProfile).ThenInclude(c => c.Follows)//.ThenInclude(c => ((AllianceIDHolderSocialProfile)c.FollowedSocialProfile).AllianceIDHolder).ThenInclude(c => c.Country)
+                .Include(x => x.SelectedBusiness).ThenInclude(c => c.BusinessSocialProfile).ThenInclude(c => c.Follows)//.ThenInclude(c => ((AccountHolderSocialProfile)c.FollowedSocialProfile).AccountHolder).ThenInclude(c => c.Country)
                 //.Include(x => x.SelectedBusiness).ThenInclude(c => c.BusinessSocialProfile).ThenInclude(c => c.Follows)//.ThenInclude(c => ((BusinessSocialProfile)c.FollowedSocialProfile).Business).ThenInclude(c => c.Country)
                 //.Include(x => x.SelectedBusiness).ThenInclude(c => c.BusinessSocialProfile).ThenInclude(c => c.Follows)//.ThenInclude(c => ((ContactSocialProfile)c.FollowedSocialProfile).Contact).ThenInclude(c => c.Country)
                 // Add Followers
-                .Include(x => x.SelectedBusiness).ThenInclude(c => c.BusinessSocialProfile).ThenInclude(c => c.Followers)//.ThenInclude(c => ((AllianceIDHolderSocialProfile)c.FollowedSocialProfile).AllianceIDHolder).ThenInclude(c => c.Country)
+                .Include(x => x.SelectedBusiness).ThenInclude(c => c.BusinessSocialProfile).ThenInclude(c => c.Followers)//.ThenInclude(c => ((AccountHolderSocialProfile)c.FollowedSocialProfile).AccountHolder).ThenInclude(c => c.Country)
                 //.Include(x => x.SelectedBusiness).ThenInclude(c => c.BusinessSocialProfile).ThenInclude(c => c.Followers)//.ThenInclude(c => ((BusinessSocialProfile)c.FollowedSocialProfile).Business).ThenInclude(c => c.Country)
                 //.Include(x => x.SelectedBusiness).ThenInclude(c => c.BusinessSocialProfile).ThenInclude(c => c.Followers)//.ThenInclude(c => ((ContactSocialProfile)c.FollowedSocialProfile).Contact).ThenInclude(c => c.Country)
-            .FirstOrDefaultAsync(c => c.GUID == HolderGUID);
+            .FirstOrDefaultAsync(c => c.ID == HolderGUID);
         }
 
-        public async Task<AllianceIDHolder> GetFullHolderAndBusiness(string HolderGUID, string TenantID)
+        public async Task<AccountHolder> GetFullHolderAndBusiness(string HolderGUID, string TenantID)
         {
-            var Holder = await _context.AllianceIDHolder
+            var Holder = await _context.AccountHolder
                 // Tenant Data
                 .Include(c => c.Country)
-                .Include(c => c.AllianceIDHolderCart).ThenInclude(c => c.Currency)
+                .Include(c => c.AccountHolderCart).ThenInclude(c => c.Currency)
                 .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.Business)
                 // Social Data
                 // Add Follows
-                .Include(c => c.SocialProfile).ThenInclude(c => c.Follows).ThenInclude(c => ((AllianceIDHolderSocialProfile)c.FollowedSocialProfile).AllianceIDHolder).ThenInclude(c => c.Country)
+                .Include(c => c.SocialProfile).ThenInclude(c => c.Follows).ThenInclude(c => ((AccountHolderSocialProfile)c.FollowedSocialProfile).AccountHolder).ThenInclude(c => c.Country)
                 .Include(c => c.SocialProfile).ThenInclude(c => c.Follows).ThenInclude(c => ((BusinessSocialProfile)c.FollowedSocialProfile).Business).ThenInclude(c => c.Country)
                 .Include(c => c.SocialProfile).ThenInclude(c => c.Follows).ThenInclude(c => ((ContactSocialProfile)c.FollowedSocialProfile).Contact).ThenInclude(c => c.Country)
                 // Add Followers
-                .Include(c => c.SocialProfile).ThenInclude(c => c.Followers).ThenInclude(c => ((AllianceIDHolderSocialProfile)c.FollowedSocialProfile).AllianceIDHolder).ThenInclude(c => c.Country)
+                .Include(c => c.SocialProfile).ThenInclude(c => c.Followers).ThenInclude(c => ((AccountHolderSocialProfile)c.FollowedSocialProfile).AccountHolder).ThenInclude(c => c.Country)
                 .Include(c => c.SocialProfile).ThenInclude(c => c.Followers).ThenInclude(c => ((BusinessSocialProfile)c.FollowedSocialProfile).Business).ThenInclude(c => c.Country)
                 .Include(c => c.SocialProfile).ThenInclude(c => c.Followers).ThenInclude(c => ((ContactSocialProfile)c.FollowedSocialProfile).Contact).ThenInclude(c => c.Country)
-            .FirstOrDefaultAsync(c => c.GUID == HolderGUID);
+            .FirstOrDefaultAsync(c => c.ID == HolderGUID);
             // Validate if selection access is granted for this Tenant.
             if(Holder.BusinessProfileRecords.Any(c=>c.BusinessID == TenantID))
             {
@@ -169,11 +169,11 @@ namespace FenixAlliance.APS.Core.DataAccess
                   .Include(c => c.BusinessCart).ThenInclude(c => c.Currency)
                   // Businesses Social Data
                   // Add Follows
-                  .Include(c => c.BusinessSocialProfile).ThenInclude(c => c.Follows).ThenInclude(c => ((AllianceIDHolderSocialProfile)c.FollowedSocialProfile).AllianceIDHolder).ThenInclude(c => c.Country)
+                  .Include(c => c.BusinessSocialProfile).ThenInclude(c => c.Follows).ThenInclude(c => ((AccountHolderSocialProfile)c.FollowedSocialProfile).AccountHolder).ThenInclude(c => c.Country)
                   .Include(c => c.BusinessSocialProfile).ThenInclude(c => c.Follows).ThenInclude(c => ((BusinessSocialProfile)c.FollowedSocialProfile).Business).ThenInclude(c => c.Country)
                   .Include(c => c.BusinessSocialProfile).ThenInclude(c => c.Follows).ThenInclude(c => ((ContactSocialProfile)c.FollowedSocialProfile).Contact).ThenInclude(c => c.Country)
                   // Add Followers
-                  .Include(c => c.BusinessSocialProfile).ThenInclude(c => c.Followers).ThenInclude(c => ((AllianceIDHolderSocialProfile)c.FollowedSocialProfile).AllianceIDHolder).ThenInclude(c => c.Country)
+                  .Include(c => c.BusinessSocialProfile).ThenInclude(c => c.Followers).ThenInclude(c => ((AccountHolderSocialProfile)c.FollowedSocialProfile).AccountHolder).ThenInclude(c => c.Country)
                   .Include(c => c.BusinessSocialProfile).ThenInclude(c => c.Followers).ThenInclude(c => ((BusinessSocialProfile)c.FollowedSocialProfile).Business).ThenInclude(c => c.Country)
                   .Include(c => c.BusinessSocialProfile).ThenInclude(c => c.Followers).ThenInclude(c => ((ContactSocialProfile)c.FollowedSocialProfile).Contact).ThenInclude(c => c.Country)
                   .FirstOrDefaultAsync(c => c.ID == TenantID);
@@ -199,19 +199,19 @@ namespace FenixAlliance.APS.Core.DataAccess
                 {
                     if (!String.IsNullOrEmpty(BusinessID))
                     {
-                        Response = (await _context.AllianceIDHolder
+                        Response = (await _context.AccountHolder
                             .Include(c => c.BusinessProfileRecords)
                             .ThenInclude(c => c.BusinessSecurityLogs)
-                            .FirstAsync(c => c.GUID == HolderGUID))
+                            .FirstAsync(c => c.ID == HolderGUID))
                             .BusinessProfileRecords.Where(c => c.ID == BusinessProfileRecordID && c.BusinessID == BusinessID)
                             .SelectMany(c => c.BusinessSecurityLogs).ToList();
                     }
                     else
                     {
-                        Response = (await _context.AllianceIDHolder
+                        Response = (await _context.AccountHolder
                             .Include(c => c.BusinessProfileRecords)
                             .ThenInclude(c => c.BusinessSecurityLogs)
-                            .FirstAsync(c => c.GUID == HolderGUID))
+                            .FirstAsync(c => c.ID == HolderGUID))
                             .BusinessProfileRecords.Where(c => c.ID == BusinessProfileRecordID)
                             .SelectMany(c => c.BusinessSecurityLogs).ToList();
                     }
@@ -221,19 +221,19 @@ namespace FenixAlliance.APS.Core.DataAccess
 
                     if (!String.IsNullOrEmpty(BusinessID))
                     {
-                        Response = (await _context.AllianceIDHolder
+                        Response = (await _context.AccountHolder
                             .Include(c => c.BusinessProfileRecords)
                             .ThenInclude(c => c.BusinessSecurityLogs)
-                            .FirstAsync(c => c.GUID == HolderGUID))
+                            .FirstAsync(c => c.ID == HolderGUID))
                             .BusinessProfileRecords.Where(c => c.BusinessID == BusinessID)
                             .SelectMany(c => c.BusinessSecurityLogs).ToList();
                     }
                     else
                     {
-                        Response = (await _context.AllianceIDHolder
+                        Response = (await _context.AccountHolder
                             .Include(c => c.BusinessProfileRecords)
                             .ThenInclude(c => c.BusinessSecurityLogs)
-                            .FirstAsync(c => c.GUID == HolderGUID))
+                            .FirstAsync(c => c.ID == HolderGUID))
                             .BusinessProfileRecords
                             .SelectMany(c => c.BusinessSecurityLogs).ToList();
                     }

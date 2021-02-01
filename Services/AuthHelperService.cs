@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
 using FenixAlliance.ABM.Models.DTOs.Authorization;
+using FenixAlliance.ACL.Configuration.Interfaces;
 using FenixAlliance.APS.Core.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -23,7 +24,7 @@ namespace FenixAlliance.APS.Core.Services
         public bool IsAuthorized { get; set; }
         public HttpClient WebClient { get; set; }
 
-        public AuthHelperService(IConfiguration configuration, IHostEnvironment hostingEnvironment)
+        public AuthHelperService(IConfiguration configuration, IHostEnvironment hostingEnvironment, ISuiteOptions Options)
         {
             _env = hostingEnvironment;
             _configuration = configuration;

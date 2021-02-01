@@ -47,27 +47,27 @@ namespace FenixAlliance.APS.Core.DataAccess
 
         public async Task<bool> ResolveRequestedAccessAsync(string HolderGUID, List<string> RequiredPermissions, List<string> RequiredRoles = null)
         {
-            var Holder = await _context.AllianceIDHolder.AsNoTracking()
+            var Holder = await _context.AccountHolder.AsNoTracking()
                 .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileSecurityRoleGrants).ThenInclude(c => c.BusinessSecurityRole).ThenInclude(c => c.BusinessRolePermissionGrants).ThenInclude(c=>c.BusinessPermission)
                 .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileDirectPermissionGrants).ThenInclude(c => c.BusinessPermission)
                 .Include(c => c.SelectedBusiness)
-                .FirstOrDefaultAsync(c => c.GUID == HolderGUID);
+                .FirstOrDefaultAsync(c => c.ID == HolderGUID);
 
             return ResolveRequestedAccess(Holder, RequiredPermissions, RequiredRoles);
         }
 
         public async Task<bool> ResolveRequestedAccessAsync(string HolderGUID,string BusinessTenantID, List<string> RequiredPermissions, List<string> RequiredRoles = null)
         {
-            var Holder = await _context.AllianceIDHolder.AsNoTracking()
+            var Holder = await _context.AccountHolder.AsNoTracking()
                 .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileSecurityRoleGrants).ThenInclude(c => c.BusinessSecurityRole).ThenInclude(c => c.BusinessRolePermissionGrants).ThenInclude(c=>c.BusinessPermission)
                 .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileDirectPermissionGrants).ThenInclude(c => c.BusinessPermission)
                 .Include(c => c.SelectedBusiness)
-                .FirstOrDefaultAsync(c => c.GUID == HolderGUID);
+                .FirstOrDefaultAsync(c => c.ID == HolderGUID);
 
             return ResolveRequestedAccess(Holder,BusinessTenantID, RequiredPermissions, RequiredRoles);
         }
 
-        public bool ResolveRequestedAccess(AllianceIDHolder Holder, List<string> RequiredPermissions, List<string> RequiredRoles = null)
+        public bool ResolveRequestedAccess(AccountHolder Holder, List<string> RequiredPermissions, List<string> RequiredRoles = null)
         {
             bool Authorized = false;
             if (Holder.SelectedBusiness == null)
@@ -142,7 +142,7 @@ namespace FenixAlliance.APS.Core.DataAccess
             return Authorized;
         }
 
-        public bool ResolveRequestedAccess(AllianceIDHolder Holder, string BusinessTenantID, List<string> RequiredPermissions, List<string> RequiredRoles = null)
+        public bool ResolveRequestedAccess(AccountHolder Holder, string BusinessTenantID, List<string> RequiredPermissions, List<string> RequiredRoles = null)
         {
             bool Authorized = false;
 
@@ -256,11 +256,11 @@ namespace FenixAlliance.APS.Core.DataAccess
 
         public async Task<BusinessProfileRecord> GetCurrentBusinessProfileRecordAsync(string HolderGUID)
         {
-            var User = await _context.AllianceIDHolder.AsNoTracking()
+            var User = await _context.AccountHolder.AsNoTracking()
                 .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileSecurityRoleGrants).ThenInclude(c => c.BusinessSecurityRole)
                 .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileDirectPermissionGrants).ThenInclude(c => c.BusinessPermission)
                 .Include(c => c.SelectedBusiness)
-                .FirstOrDefaultAsync(c => c.GUID == HolderGUID);
+                .FirstOrDefaultAsync(c => c.ID == HolderGUID);
 
             if (User.SelectedBusiness == null)
             {
@@ -272,49 +272,49 @@ namespace FenixAlliance.APS.Core.DataAccess
 
         public async Task<List<BusinessProfileRecord>> GetHolderBusinessProfileRecordsAsync(string HolderGUID)
         {
-            return (await _context.AllianceIDHolder.AsNoTracking()
+            return (await _context.AccountHolder.AsNoTracking()
                 .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.Business).ThenInclude(c => c.Country)
                 .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.Business).ThenInclude(c => c.ActiveUsers)
-            .FirstOrDefaultAsync(c => c.GUID == HolderGUID)).BusinessProfileRecords;
+            .FirstOrDefaultAsync(c => c.ID == HolderGUID)).BusinessProfileRecords;
         }
 
         public async Task<List<Business>> GetHolderBusinessesAsync(string HolderGUID)
         {
-            return (await _context.AllianceIDHolder.AsNoTracking()
+            return (await _context.AccountHolder.AsNoTracking()
                 .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.Business).ThenInclude(c => c.Country)
-            .FirstOrDefaultAsync(c => c.GUID == HolderGUID)).BusinessProfileRecords.Select(c => c.Business).ToList();
+            .FirstOrDefaultAsync(c => c.ID == HolderGUID)).BusinessProfileRecords.Select(c => c.Business).ToList();
         }
 
-        public List<Business> GetHolderBusinesses(AllianceIDHolder Holder)
+        public List<Business> GetHolderBusinesses(AccountHolder Holder)
         {
             return Holder.BusinessProfileRecords.Select(c => c.Business)?.ToList();
         }
 
         public async Task<Business> GetHolderCurrentBusinessAsync(string HolderGUID)
         {
-            return (await _context.AllianceIDHolder.AsNoTracking()
+            return (await _context.AccountHolder.AsNoTracking()
                 .Include(c => c.SelectedBusiness)
-            .FirstOrDefaultAsync(c => c.GUID == HolderGUID)).SelectedBusiness;
+            .FirstOrDefaultAsync(c => c.ID == HolderGUID)).SelectedBusiness;
         }
 
-        public Business GetHolderCurrentBusiness(AllianceIDHolder Holder)
+        public Business GetHolderCurrentBusiness(AccountHolder Holder)
         {
             return Holder.SelectedBusiness;
         }
 
         public async Task<BusinessProfileRecord> GetSpecificBusinessProfileRecordAsync(string HolderGUID, string BusinessID)
         {
-            return (await _context.AllianceIDHolder.AsNoTracking()
+            return (await _context.AccountHolder.AsNoTracking()
                 .Include(c => c.BusinessProfileRecords)
-            .FirstOrDefaultAsync(c => c.GUID == HolderGUID)).BusinessProfileRecords.FirstOrDefault(c => c.BusinessID == BusinessID);
+            .FirstOrDefaultAsync(c => c.ID == HolderGUID)).BusinessProfileRecords.FirstOrDefault(c => c.BusinessID == BusinessID);
         }
 
-        public BusinessProfileRecord GetSpecificBusinessProfileRecord(AllianceIDHolder Holder, string BusinessID)
+        public BusinessProfileRecord GetSpecificBusinessProfileRecord(AccountHolder Holder, string BusinessID)
         {
             return Holder.BusinessProfileRecords.First(c => c.BusinessID == BusinessID);
         }
 
-        public BusinessProfileRecord GetCurrentBusinessProfileRecord(AllianceIDHolder Holder)
+        public BusinessProfileRecord GetCurrentBusinessProfileRecord(AccountHolder Holder)
         {
             if (Holder.SelectedBusiness == null)
             {
@@ -337,7 +337,7 @@ namespace FenixAlliance.APS.Core.DataAccess
                             .Include(c => c.BusinessProfileRecords)
                             .ThenInclude(c=>c.BusinessSecurityLogs)
                             .FirstAsync(c => c.ID == BusinessID))
-                            .BusinessProfileRecords.Where(c=>c.ID == BusinessProfileRecordID && c.AllianceIDHolderGUID == HolderGUID)
+                            .BusinessProfileRecords.Where(c=>c.ID == BusinessProfileRecordID && c.AccountHolderGUID == HolderGUID)
                             .SelectMany(c=>c.BusinessSecurityLogs).ToList();
                     }
                     else
@@ -359,7 +359,7 @@ namespace FenixAlliance.APS.Core.DataAccess
                             .Include(c => c.BusinessProfileRecords)
                             .ThenInclude(c=>c.BusinessSecurityLogs)
                             .FirstAsync(c => c.ID == BusinessID))
-                            .BusinessProfileRecords.Where(c=> c.AllianceIDHolderGUID == HolderGUID)
+                            .BusinessProfileRecords.Where(c=> c.AccountHolderGUID == HolderGUID)
                             .SelectMany(c=>c.BusinessSecurityLogs).ToList();
                     }
                     else

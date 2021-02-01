@@ -232,7 +232,7 @@
     <value>Alliance ID Pocket</value>
   </data>
   <data name="Alliance ID Support Team" xml:space="preserve">
-    <value>Equipo de soporte AllianceIDHolder</value>
+    <value>Equipo de soporte AccountHolder</value>
   </data>
   <data name="Alliance Partners for Education" xml:space="preserve">
     <value>Asociados para educación</value>
@@ -438,7 +438,7 @@
   <data name="Business' Wallet" xml:space="preserve">
     <value>Billetera del negocios</value>
   </data>
-  <data name="Business' Wishlists" xml:space="preserve">
+  <data name="Business' WishLists" xml:space="preserve">
     <value>Listas de regalos</value>
   </data>
   <data name="Buy" xml:space="preserve">
@@ -982,7 +982,7 @@
     <value>Obtén tu cuenta &lt;strong&gt;Alliance ID&lt;/strong&gt; completamente gratis.</value>
   </data>
   <data name="Get your free &lt;strong&gt;AllianceID&lt;/strong&gt; Account." xml:space="preserve">
-    <value>Obtén tu cuenta &lt;strong&gt;AllianceIDHolder&lt;/strong&gt;  gratis.</value>
+    <value>Obtén tu cuenta &lt;strong&gt;AccountHolder&lt;/strong&gt;  gratis.</value>
   </data>
   <data name="Give us a call" xml:space="preserve">
     <value>Danos una llamada</value>
@@ -1447,7 +1447,7 @@
     <value>¿Este no? ¡Entendido!</value>
   </data>
   <data name="Now possible through your AllianceID." xml:space="preserve">
-    <value>Posible a través de tu AllianceIDHolder.</value>
+    <value>Posible a través de tu AccountHolder.</value>
   </data>
   <data name="Office Technology" xml:space="preserve">
     <value>Tecnología para oficina</value>
@@ -1975,7 +1975,7 @@
     <value>Mercado de soluciones</value>
   </data>
   <data name="Soon you'll be able to take Fenix Alliance Group everywhere with AllianceID Pocket." xml:space="preserve">
-    <value>Pronto podrás llevar a Fenix Alliance Group a cualquier lugar con AllianceIDHolder Pocket.</value>
+    <value>Pronto podrás llevar a Fenix Alliance Group a cualquier lugar con AccountHolder Pocket.</value>
   </data>
   <data name="Sound Cards" xml:space="preserve">
     <value>Tarjetas de sonido</value>
@@ -2160,7 +2160,7 @@
   <data name="To Reach beyond expectations." xml:space="preserve">
     <value>Para llegar más allá de las expectativas.</value>
   </data>
-  <data name="to see your wishlist, products you've seen recently and outstanding recommendations." xml:space="preserve">
+  <data name="to see your WishList, products you've seen recently and outstanding recommendations." xml:space="preserve">
     <value>para ver tus lista de deseos, los productos que has visto recientemente y las recomendaciones más destacadas.</value>
   </data>
   <data name="Today, Fenix Alliance has become a powerful commercial business ally dedicated to supporting organizations from various industries in their IT operations, recognizing good practices in all our activities and continuously praising our social commitment." xml:space="preserve">
@@ -2415,7 +2415,7 @@
   <data name="You are now following this user account." xml:space="preserve">
     <value>Ahora estás siguiendo esta cuenta de usuario.</value>
   </data>
-  <data name="You can add it to a wishlist and we will send you an email when this product's state changes." xml:space="preserve">
+  <data name="You can add it to a WishList and we will send you an email when this product's state changes." xml:space="preserve">
     <value>Puedes agregarlo a una lista de deseos y te enviaremos un correo electrónico cuando cambie el estado o el precio base de este producto.</value>
   </data>
   <data name="You can change your currency by selecting it from the dropdown on the top-left hand side corner of our website or by using our" xml:space="preserve">
@@ -2493,7 +2493,7 @@
   <data name="Your wallet" xml:space="preserve">
     <value>Tu billetera</value>
   </data>
-  <data name="Your Wishlists" xml:space="preserve">
+  <data name="Your WishLists" xml:space="preserve">
     <value>Tus listas de deseos</value>
   </data>
   <data name="/abs/dashboard/assets/media/flags/128-spain.svg" xml:space="preserve">
