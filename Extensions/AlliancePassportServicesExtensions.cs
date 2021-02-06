@@ -1,10 +1,13 @@
-﻿using FenixAlliance.ACL.Configuration.Interfaces;
-using FenixAlliance.ACL.Configuration.Types;
+﻿using System;
+using FenixAlliance.ABM.Data;
+using FenixAlliance.ACL.Configuration.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.AzureAD.UI;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -19,7 +22,7 @@ namespace FenixAlliance.APS.Core.Extensions
 
             if (Options.APS.Enable)
             {
-
+                // Adds required Services for AAD B2C
                 if (Options?.APS?.AzureADB2C?.DefaultProvider ?? false)
                 {
                     if (!Options?.APS?.AzureAd.DefaultProvider ?? false)
@@ -42,6 +45,7 @@ namespace FenixAlliance.APS.Core.Extensions
                     }
                 }
 
+                // Adds required Services for AAD B2C
                 if (Options?.APS?.AzureAd.DefaultProvider ?? false)
                 {
                     if (!Options?.APS?.AzureADB2C?.DefaultProvider ?? false)
@@ -52,6 +56,60 @@ namespace FenixAlliance.APS.Core.Extensions
                                 options)).AddCookie();
                     }
                 }
+
+
+                services.AddDbContext<ABMContext>(options =>
+                    // options.UseSqlite(
+                    options.UseSqlServer(
+                        Configuration.GetConnectionString("DefaultConnection")));
+
+                services.AddDatabaseDeveloperPageExceptionFilter();
+
+
+                services.AddDefaultIdentity<IdentityUser>(options =>
+                    {
+                        options.SignIn.RequireConfirmedAccount = true;
+                    })
+                    .AddEntityFrameworkStores<ABMContext>();
+
+                services.AddRazorPages();
+
+                // Adds required services for Default Identity
+                services.Configure<IdentityOptions>(options =>
+                {
+                    // Password settings.
+                    options.Password.RequireDigit = true;
+                    options.Password.RequireLowercase = true;
+                    options.Password.RequireNonAlphanumeric = true;
+                    options.Password.RequireUppercase = true;
+                    options.Password.RequiredLength = 6;
+                    options.Password.RequiredUniqueChars = 1;
+
+                    // Lockout settings.
+                    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                    options.Lockout.MaxFailedAccessAttempts = 5;
+                    options.Lockout.AllowedForNewUsers = true;
+
+                    // User settings.
+                    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+                    options.User.RequireUniqueEmail = false;
+                });
+
+                services.ConfigureApplicationCookie(options =>
+                {
+
+                    // Cookie settings
+                    options.Cookie.HttpOnly = true;
+
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+
+                    options.LoginPath = "/Identity/Account/Login";
+                    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+                    options.SlidingExpiration = true;
+
+                });
+                // Adds required services for IdentityServer4
+
 
             }
             #endregion

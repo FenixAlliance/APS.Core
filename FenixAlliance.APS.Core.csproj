@@ -113,5 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FenixAlliance.ABM.Hub" Version="1.1.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Abstractions" Version="2.2.0" />
+
   </ItemGroup>
 </Project>
