@@ -1,16 +1,21 @@
 ﻿using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using FenixAlliance.ABM.Data;
 using FenixAlliance.ACL.Configuration.Enums;
 using FenixAlliance.ACL.Configuration.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.AzureAD.UI;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 
 namespace FenixAlliance.APS.Core.Extensions
 {
@@ -25,7 +30,6 @@ namespace FenixAlliance.APS.Core.Extensions
 
                 if (Options?.APS?.AuthenticationProvider == AuthenticationProvider.DefaultIdentity)
                 {
-
 
                     services.AddDefaultIdentity<IdentityUser>(options =>
                         {
@@ -55,8 +59,69 @@ namespace FenixAlliance.APS.Core.Extensions
                         options.SlidingExpiration = true;
 
                     });
-                    // Adds required services for IdentityServer4
 
+                }
+
+                if (Options?.APS?.AuthenticationProvider == AuthenticationProvider.IdentityServer4)
+                {
+                    var apsOperationalDataStores = Options?.ABM?.Providers.Where(c =>
+                        c.ProviderPurpose == AllianceBusinessModelProviderPurpose.APS_Operational);
+
+                    var apsConfigurationStores = Options?.ABM?.Providers.Where(c =>
+                        c.ProviderPurpose == AllianceBusinessModelProviderPurpose.APS_Operational);
+
+                    if (apsOperationalDataStores.Any() && apsConfigurationStores.Any())
+                    {
+
+                        var builder = services.AddIdentityServer()
+                            // this adds the operational data from DB (codes, tokens, consents)
+                            .AddOperationalStore(options =>
+                            {
+
+                                options.ConfigureDbContext = builder =>
+                                    builder.UseSqlServer(apsOperationalDataStores.First().ConnectionString,
+                                        sql => sql.MigrationsAssembly("")
+                                            .MigrationsHistoryTable(apsOperationalDataStores?.First()?.MigrationsHistoryTableName ?? "ApsConfigurationMigrationTable",
+                                                apsOperationalDataStores?.First()?.MigrationsHistoryTableSchema ?? "ApsConfigurationSchema"));
+
+                                // this enables automatic token cleanup. this is optional.
+                                options.EnableTokenCleanup = true;
+                                options.TokenCleanupInterval = 3600; // interval in seconds (default is 3600)
+
+                            }).AddConfigurationStore(options =>
+                            {
+                                options.ConfigureDbContext = builder =>
+                                    builder.UseSqlServer("",
+                                        sql => sql.MigrationsAssembly(""));
+                            });
+
+                    }
+
+                    services.AddAuthentication("Bearer")
+                        .AddJwtBearer("Bearer", options =>
+                            {
+                                options = Options?.APS?.IdentityServer4.JwtBearerOptions ?? new JwtBearerOptions();
+                            });
+
+
+                    // MVC
+                    JwtSecurityTokenHandler.DefaultMapInboundClaims = (bool)Options?.APS?.IdentityServer4.DefaultMapInboundClaims;
+
+                    services.AddAuthentication(options =>
+                        {
+                            options.DefaultScheme = "Cookies";
+                            options.DefaultChallengeScheme = "oidc";
+                        })
+                        .AddCookie("Cookies")
+                        .AddOpenIdConnect("oidc", options =>
+                        {
+                            options.Authority = "https://localhost:5001";
+
+                            options.ClientId = "mvc";
+                            options.ClientSecret = "secret";
+                            options.ResponseType = "code";
+                            options.SaveTokens = true;
+                        });
                 }
 
                 if (Options?.APS?.AuthenticationProvider == AuthenticationProvider.AzureActiveDirectory)
@@ -100,10 +165,6 @@ namespace FenixAlliance.APS.Core.Extensions
                     }
                 }
 
-                if (Options?.APS?.AuthenticationProvider == AuthenticationProvider.IdentityServer4)
-                {
-                    // TODO: Finish implementing IdentityServer4
-                }
             }
             #endregion
 
