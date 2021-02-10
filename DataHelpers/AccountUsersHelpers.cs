@@ -112,7 +112,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
                     {
                         GUID = GetActiveDirectoryNameIdentifier(User);
                         var name = GetActiveDirectoryGivenName(User);
-                        var nameIdentifier = Guid.NewGuid().ToString(); ;
+                        var nameIdentifier = Guid.NewGuid().ToString();
                         var lastName = GetActiveDirectorySurName(User);
                         var publicName = GetActiveDirectoryName(User);
                         var email = GetActiveDirectoryEmail(User);
