@@ -107,7 +107,8 @@ namespace FenixAlliance.APS.Core.DataHelpers
                 //CheckValues
                 foreach (Claim claim in User.Claims)
                 {
-                    if (claim.Type.ToString().ToLower().Contains("objectidentifier"))
+                    if (claim.Type.ToString().ToLower().Contains("objectidentifier") ||
+                        claim.Type.ToString().ToLower().Contains("nameidentifier"))
                     {
                         GUID = GetActiveDirectoryNameIdentifier(User);
                         var name = GetActiveDirectoryGivenName(User);
@@ -470,7 +471,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
             if (User.Identity.IsAuthenticated)
             {
                 //CheckValues
-                foreach (Claim claim in User.Claims)
+                foreach (Claim claim in User?.Claims)
                 {
                     if (claim.Type.ToString().Contains("surname"))
                     {
@@ -486,7 +487,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
             if (User.Identity.IsAuthenticated)
             {
                 //CheckValues
-                foreach (Claim claim in User.Claims)
+                foreach (Claim claim in User?.Claims)
                 {
                     if (claim.Type.ToString().Contains("givenname"))
                     {
