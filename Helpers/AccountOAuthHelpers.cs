@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
 
-namespace FenixAlliance.APS.Core.DataHelpers
+namespace FenixAlliance.APS.Core.Helpers
 {
     public class AccountOAuthHelpers
     {

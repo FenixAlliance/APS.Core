@@ -1,7 +1,8 @@
 ﻿using System.Threading.Tasks;
 using FenixAlliance.ABM.Data;
-using FenixAlliance.APS.Core.DataAccess;
-using FenixAlliance.APS.Core.DataHelpers;
+using FenixAlliance.ABM.Data.Access.Clients;
+using FenixAlliance.ABM.Data.Access.Helpers;
+using FenixAlliance.APS.Core.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -19,10 +20,10 @@ namespace FenixAlliance.APS.Core.Controllers.Auth
         public StoreHelpers StoreHelpers { get; }
         public IConfiguration Configuration { get; }
         public IHostEnvironment HostEnvironment { get; }
-        public BusinessHelpers BusinessHelpers { get; }
+        public TenantHelpers TenantHelpers { get; }
         public AccountUsersHelpers AccountUsersHelpers { get; }
         public AccountGraphHelpers AccountGraphHelpers { get; }
-        public BusinessDataAccessClient BusinessDataAccess { get; }
+        public TenantDataAccessClient BusinessDataAccess { get; }
         public BlobStorageDataAccessClient StorageDataAccessClient { get; }
 
         public ApplicationsController(ABMContext context, IConfiguration configuration, IHostEnvironment hostingEnvironment)
@@ -31,10 +32,10 @@ namespace FenixAlliance.APS.Core.Controllers.Auth
             Configuration = configuration;
             HostEnvironment = hostingEnvironment;
             StoreHelpers = new StoreHelpers(DataContext);
-            BusinessHelpers = new BusinessHelpers(context);
+            TenantHelpers = new TenantHelpers(context);
             AccountUsersHelpers = new AccountUsersHelpers(context);
             AccountGraphHelpers = new AccountGraphHelpers(DataContext, Configuration);
-            BusinessDataAccess = new BusinessDataAccessClient(DataContext, Configuration, HostEnvironment);
+            BusinessDataAccess = new TenantDataAccessClient(DataContext, Configuration, HostEnvironment);
             StorageDataAccessClient = new BlobStorageDataAccessClient();
         }
 

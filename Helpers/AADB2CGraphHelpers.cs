@@ -4,23 +4,23 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using FenixAlliance.ABM.Data.Access.Interfaces.DataHelpers;
+using FenixAlliance.ABM.Data.Interfaces.Helpers;
 using FenixAlliance.APS.Core.Models;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Newtonsoft.Json;
 
-namespace FenixAlliance.APS.Core.DataHelpers
+namespace FenixAlliance.APS.Core.Helpers
 {
-    public class B2CGraphClient : IB2CGraphClient
+    public class AADB2CGraphHelpers : IAADB2CGraphHelpers
     {
         private string clientId { get; set; }
         private string clientSecret { get; set; }
         private string tenant { get; set; }
 
-        private AuthenticationContext authContext;
-        private ClientCredential credential;
+        private readonly AuthenticationContext authContext;
+        private readonly ClientCredential credential;
 
-        public B2CGraphClient(string clientId, string clientSecret, string tenant)
+        public AADB2CGraphHelpers(string clientId, string clientSecret, string tenant)
         {
             // The client_id, client_secret, and tenant are pulled in from the App.config file
             this.clientId = clientId;
@@ -201,7 +201,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
             // The first parameter is the resource we want an access_token for; in this case, the Graph API.
             AuthenticationResult result = await authContext.AcquireTokenAsync("https://graph.windows.net", credential);
 
-            // For B2C user managment, be sure to use the 1.6 Graph API version.
+            // For B2C user management, be sure to use the 1.6 Graph API version.
             HttpClient http = new HttpClient();
             string url = "https://graph.windows.net/" + tenant + api + "?" + Globals.aadGraphVersion;
             if (!string.IsNullOrEmpty(query))
@@ -242,7 +242,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
             // The first parameter is the resource we want an access_token for; in this case, the Graph API.
             AuthenticationResult result = await authContext.AcquireTokenAsync("https://graph.windows.net", credential);
 
-            // For B2C user managment, be sure to use the 1.6 Graph API version.
+            // For B2C user management, be sure to use the 1.6 Graph API version.
             HttpClient http = new HttpClient();
             string url = "https://graph.windows.net/" + tenant + api + query + "/$links/members?api-version=1.6";
             Console.ForegroundColor = ConsoleColor.Cyan;
@@ -276,7 +276,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
             // The first parameter is the resource we want an access_token for; in this case, the Graph API.
             AuthenticationResult result = await authContext.AcquireTokenAsync("https://graph.windows.net", credential);
 
-            // For B2C user managment, be sure to use the 1.6 Graph API version.
+            // For B2C user management, be sure to use the 1.6 Graph API version.
             HttpClient http = new HttpClient();
             string url = "https://graph.windows.net/" + tenant + api + "/$links/memberOf?api-version=1.6";
             Console.ForegroundColor = ConsoleColor.Cyan;
@@ -309,7 +309,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
             // The first parameter is the resource we want an access_token for; in this case, the Graph API.
             AuthenticationResult result = await authContext.AcquireTokenAsync("https://graph.windows.net", credential);
 
-            // For B2C user managment, be sure to use the 1.6 Graph API version.
+            // For B2C user management, be sure to use the 1.6 Graph API version.
             HttpClient http = new HttpClient();
             string url = "https://graph.windows.net/" + tenant + api + "/$links/memberOf?api-version=1.6";
             Console.ForegroundColor = ConsoleColor.Cyan;

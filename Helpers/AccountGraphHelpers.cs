@@ -1,12 +1,12 @@
 ﻿using System.Security.Claims;
 using System.Threading.Tasks;
 using FenixAlliance.ABM.Data;
-using FenixAlliance.ABM.Data.Access.Interfaces.DataHelpers;
+using FenixAlliance.ABM.Data.Interfaces.Helpers;
 using FenixAlliance.APS.Core.Models;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
-namespace FenixAlliance.APS.Core.DataHelpers
+namespace FenixAlliance.APS.Core.Helpers
 {
     public class AccountGraphHelpers : IAccountGraphHelpers
     {
@@ -22,11 +22,11 @@ namespace FenixAlliance.APS.Core.DataHelpers
             AccountTools = new AccountUsersHelpers(context);
         }
 
-        public IB2CGraphClient GetB2CGraphClient()
+        public IAADB2CGraphHelpers GetB2CGraphClient()
         {
             var ADGraphSettings = _configuration.GetSection("ADGraphSettings");
 
-            return new B2CGraphClient(ADGraphSettings.GetValue<string>("ClientId"),
+            return new AADB2CGraphHelpers(ADGraphSettings.GetValue<string>("ClientId"),
                 ADGraphSettings.GetValue<string>("ClientSecret"),
                 ADGraphSettings.GetValue<string>("Tenant"));
         }
@@ -38,7 +38,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
             // Get ADGraph client
             var ADGraphSettings = _configuration.GetSection("ADSecurityGroup");
             var GroupID = ADGraphSettings.GetValue<string>(RoleName);
-            B2CGraphClient client = (B2CGraphClient)GetB2CGraphClient();
+            AADB2CGraphHelpers client = (AADB2CGraphHelpers)GetB2CGraphClient();
             return IsMemberOf(GUID, GroupID, client);
         }
 
@@ -47,11 +47,11 @@ namespace FenixAlliance.APS.Core.DataHelpers
             // Get ADGraph client
             var ADGraphSettings = _configuration.GetSection("ADSecurityGroup");
             var GroupID = ADGraphSettings.GetValue<string>(RoleName);
-            B2CGraphClient client = (B2CGraphClient)GetB2CGraphClient();
+            AADB2CGraphHelpers client = (AADB2CGraphHelpers)GetB2CGraphClient();
             return IsMemberOf(GUID, GroupID, client);
         }
 
-        public static MemberOf GetMemberOf(string GUID, B2CGraphClient _client)
+        public static MemberOf GetMemberOf(string GUID, AADB2CGraphHelpers _client)
         {
             return JsonConvert.DeserializeObject<MemberOf>(_client.GetMemberOf(GUID).Result); ;
         }
@@ -63,7 +63,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
         /// <param name="ADGroupID">The Security group ID to validate against.</param>
         /// <param name="_client"></param>
         /// <returns>True if the user belongs to the Security Group, False otherwise.</returns>
-        public static async Task<bool> IsMemberOf(string GUID, string ADGroupID, B2CGraphClient _client)
+        public static async Task<bool> IsMemberOf(string GUID, string ADGroupID, AADB2CGraphHelpers _client)
         {
             var result = await _client.GetMemberOf(GUID);
             MemberOf formatted = JsonConvert.DeserializeObject<MemberOf>(result);

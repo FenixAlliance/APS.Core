@@ -18,10 +18,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using FenixAlliance.ABM.Data.Interfaces.Helpers;
 
-namespace FenixAlliance.APS.Core.DataHelpers
+namespace FenixAlliance.APS.Core.Helpers
 {
-    public class APIHelpers
+    public class ApiAuthorizationHelpers : IApiAuthorizationHelpers
     {
         public static async Task<APIResponse> BindAPIBaseResponse(ABMContext _context, HttpContext _httpContext, HttpRequest _request, AccountUsersHelpers AccountTools, ClaimsPrincipal _user, string TenantID = "", List<string> RequiredPermissions = null, List<string> RequiredRoles = null, bool EnforceBusinessResponse = false)
         {

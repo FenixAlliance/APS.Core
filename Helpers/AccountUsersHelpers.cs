@@ -3,7 +3,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using FenixAlliance.ABM.Data;
-using FenixAlliance.ABM.Data.Access.Interfaces.DataHelpers;
+using FenixAlliance.ABM.Data.Interfaces.Helpers;
 using FenixAlliance.ABM.Models.Global.Carts.CartScopes;
 using FenixAlliance.ABM.Models.Global.Wallets.WalletAccountScopes;
 using FenixAlliance.ABM.Models.Holders;
@@ -11,7 +11,7 @@ using FenixAlliance.ABM.Models.Social.SocialProfiles.Scopes;
 using FenixAlliance.APS.Core.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace FenixAlliance.APS.Core.DataHelpers
+namespace FenixAlliance.APS.Core.Helpers
 {
     public class AccountUsersHelpers : IAccountUsersHelpers
     {
@@ -28,7 +28,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
                 //CheckValues
                 foreach (Claim claim in User.Claims)
                 {
-                    if (claim.Type.ToString().ToLower().Contains("objectidentifier"))
+                    if (claim.Type.ToLower().Contains("objectidentifier"))
                     {
                         var name = GetActiveDirectoryGivenName(User);
                         GUID = GetActiveDirectoryNameIdentifier(User);
@@ -69,7 +69,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
                             }
                             catch (Exception ex)
                             {
-                                Console.WriteLine($"DbUpdateException from {GUID}: {ex.ToString()}");
+                                Console.WriteLine($"DbUpdateException from {GUID}: {ex}");
                             }
                         }
                         else
@@ -90,7 +90,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
                             }
                             catch (Exception ex)
                             {
-                                Console.WriteLine($"DbUpdateException from {GUID}: {ex.ToString()}");
+                                Console.WriteLine($"DbUpdateException from {GUID}: {ex}");
                             }
                         }
                     }
@@ -107,12 +107,12 @@ namespace FenixAlliance.APS.Core.DataHelpers
                 //CheckValues
                 foreach (Claim claim in User.Claims)
                 {
-                    if (claim.Type.ToString().ToLower().Contains("objectidentifier") ||
-                        claim.Type.ToString().ToLower().Contains("nameidentifier"))
+                    if (claim.Type.ToLower().Contains("objectidentifier") ||
+                        claim.Type.ToLower().Contains("nameidentifier"))
                     {
                         GUID = GetActiveDirectoryNameIdentifier(User);
                         var name = GetActiveDirectoryGivenName(User);
-                        var nameIdentifier = Guid.NewGuid().ToString();
+                        var nameIdentifier = Guid.NewGuid();
                         var lastName = GetActiveDirectorySurName(User);
                         var publicName = GetActiveDirectoryName(User);
                         var email = GetActiveDirectoryEmail(User);
@@ -135,7 +135,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
                                     Name = name,
                                     Email = email,
                                     IdentityProvider = identityProvider,
-                                    NameIdentifier = nameIdentifier,
+                                    NameIdentifier = nameIdentifier.ToString(),
                                     AccountHolderCart = new AccountHolderCart() { CurrencyID = "USD.USA" },
                                     AccountHolderWallet = new AccountHolderWallet(),
                                     SocialProfile = new AccountHolderSocialProfile(),
@@ -147,7 +147,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
                             }
                             catch (Exception ex)
                             {
-                                Console.WriteLine($"DbUpdateException from {GUID}: {ex.ToString()}");
+                                Console.WriteLine($"DbUpdateException from {GUID}: {ex}");
                             }
                         }
                         else
@@ -168,7 +168,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
                             }
                             catch (Exception ex)
                             {
-                                Console.WriteLine($"DbUpdateException from {GUID}: {ex.ToString()}");
+                                Console.WriteLine($"DbUpdateException from {GUID}: {ex}");
                             }
                         }
                     }
@@ -183,8 +183,8 @@ namespace FenixAlliance.APS.Core.DataHelpers
             string GUID = null;
             if (TokenUser != null)
             {
-                GUID = TokenUser.Oid.ToString();
-                var nameIdentifier = TokenUser.Oid.ToString();
+                GUID = TokenUser.Oid;
+                var nameIdentifier = TokenUser.Oid;
                 var name = TokenUser.GivenName;
                 var identityProvider = TokenUser.Idp;
                 var lastName = TokenUser.FamilyName;
@@ -229,17 +229,19 @@ namespace FenixAlliance.APS.Core.DataHelpers
                     try
                     {
                         var Holder = _context.AccountHolder.FirstOrDefault(c => c.ID == GUID);
-                        Holder.ID = GUID;
-                        Holder.PublicName = publicName;
-                        Holder.CountryID = CountryID;
-                        Holder.LastName = lastName;
-                        Holder.Name = name;
-                        Holder.Email = email;
-                        Holder.IdentityProvider = identityProvider;
+                        if (Holder != null)
+                        {
+                            Holder.ID = GUID;
+                            Holder.PublicName = publicName;
+                            Holder.CountryID = CountryID;
+                            Holder.LastName = lastName;
+                            Holder.Name = name;
+                            Holder.Email = email;
+                            Holder.IdentityProvider = identityProvider;
 
-                        _context.Entry(Holder).State = EntityState.Modified;
-
-                        _context.SaveChanges();
+                            _context.Entry(Holder).State = EntityState.Modified;
+                            _context.SaveChanges();
+                        }
                     }
                     catch
                     {
@@ -263,11 +265,11 @@ namespace FenixAlliance.APS.Core.DataHelpers
                 //CheckValues
                 foreach (Claim claim in User.Claims)
                 {
-                    if (claim.Type.ToString().ToLower().Contains("objectidentifier"))
+                    if (claim.Type.ToLower().Contains("objectidentifier"))
                     {
                         var GUID = GetActiveDirectoryNameIdentifier(User);
                         var name = GetActiveDirectoryGivenName(User);
-                        var nameIdentifier = Guid.NewGuid().ToString();
+                        var nameIdentifier = Guid.NewGuid();
                         var lastName = GetActiveDirectorySurName(User);
                         var publicName = GetActiveDirectoryName(User);
                         var email = GetActiveDirectoryEmail(User);
@@ -290,7 +292,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
                                     Name = name,
                                     Email = email,
                                     IdentityProvider = identityProvider,
-                                    NameIdentifier = nameIdentifier,
+                                    NameIdentifier = nameIdentifier.ToString(),
                                     AccountHolderWallet = new AccountHolderWallet(),
                                     AccountHolderCart = new AccountHolderCart() { CurrencyID = "USD.USA" },
                                     SocialProfile = new AccountHolderSocialProfile(),
@@ -316,7 +318,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
                             }
                             catch (Exception ex)
                             {
-                                Console.WriteLine($"DbUpdateException from {GUID}: {ex.ToString()}");
+                                Console.WriteLine($"DbUpdateException from {GUID}: {ex}");
                             }
                         }
                         else
@@ -406,7 +408,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
                             }
                             catch (Exception ex)
                             {
-                                Console.WriteLine($"DbUpdateException from {GUID}: {ex.ToString()}");
+                                Console.WriteLine($"DbUpdateException from {GUID}: {ex}");
                                 // TODO: Send Email with error details.
                             }
                         }
@@ -424,9 +426,9 @@ namespace FenixAlliance.APS.Core.DataHelpers
                 //CheckValues
                 foreach (Claim claim in User.Claims)
                 {
-                    if (claim.Type.ToString().Equals("name"))
+                    if (claim.Type.Equals("name"))
                     {
-                        return claim.Value.ToString();
+                        return claim.Value;
                     }
                 }
             }
@@ -441,9 +443,9 @@ namespace FenixAlliance.APS.Core.DataHelpers
                 //CheckValues
                 foreach (Claim claim in User.Claims)
                 {
-                    if (claim.Type.ToString().Contains("nameidentifier"))
+                    if (claim.Type.Contains("nameidentifier"))
                     {
-                        return claim.Value.ToString();
+                        return claim.Value;
                     }
                 }
             }
@@ -457,7 +459,7 @@ namespace FenixAlliance.APS.Core.DataHelpers
                 //CheckValues
                 foreach (Claim claim in User.Claims)
                 {
-                    if (claim.Type.ToString().Contains("newUser"))
+                    if (claim.Type.Contains("newUser"))
                     {
                         return claim.Value;
                     }
@@ -473,9 +475,9 @@ namespace FenixAlliance.APS.Core.DataHelpers
                 //CheckValues
                 foreach (Claim claim in User?.Claims)
                 {
-                    if (claim.Type.ToString().Contains("surname"))
+                    if (claim.Type.Contains("surname"))
                     {
-                        return claim.Value.ToString();
+                        return claim.Value;
                     }
                 }
             }
@@ -489,9 +491,9 @@ namespace FenixAlliance.APS.Core.DataHelpers
                 //CheckValues
                 foreach (Claim claim in User?.Claims)
                 {
-                    if (claim.Type.ToString().Contains("givenname"))
+                    if (claim.Type.Contains("givenname"))
                     {
-                        return claim.Value.ToString();
+                        return claim.Value;
                     }
                 }
             }
@@ -505,9 +507,9 @@ namespace FenixAlliance.APS.Core.DataHelpers
                 //CheckValues
                 foreach (Claim claim in User.Claims)
                 {
-                    if (claim.Type.ToString().Contains("jobTitle"))
+                    if (claim.Type.Contains("jobTitle"))
                     {
-                        return claim.Value.ToString();
+                        return claim.Value;
                     }
                 }
             }
@@ -521,9 +523,9 @@ namespace FenixAlliance.APS.Core.DataHelpers
                 //CheckValues
                 foreach (Claim claim in User.Claims)
                 {
-                    if (claim.Type.ToString().Contains("country"))
+                    if (claim.Type.Contains("country"))
                     {
-                        return claim.Value.ToString();
+                        return claim.Value;
                     }
                 }
             }
@@ -538,9 +540,9 @@ namespace FenixAlliance.APS.Core.DataHelpers
                 //CheckValues
                 foreach (Claim claim in User.Claims)
                 {
-                    if (claim.Type.ToString().Contains("email"))
+                    if (claim.Type.Contains("email"))
                     {
-                        return claim.Value.ToString();
+                        return claim.Value;
                     }
                 }
             }
@@ -554,9 +556,9 @@ namespace FenixAlliance.APS.Core.DataHelpers
                 //CheckValues
                 foreach (Claim claim in User.Claims)
                 {
-                    if (claim.Type.ToString().ToLower().Contains("identityprovider"))
+                    if (claim.Type.ToLower().Contains("identityprovider"))
                     {
-                        return claim.Value.ToString();
+                        return claim.Value;
                     }
                 }
             }
@@ -570,9 +572,9 @@ namespace FenixAlliance.APS.Core.DataHelpers
                 //CheckValues
                 foreach (Claim claim in User.Claims)
                 {
-                    if (claim.Type.ToString().ToLower().Contains("token"))
+                    if (claim.Type.ToLower().Contains("token"))
                     {
-                        return claim.Value.ToString();
+                        return claim.Value;
                     }
                 }
             }

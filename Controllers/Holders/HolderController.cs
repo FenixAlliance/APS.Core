@@ -2,14 +2,15 @@
 using System.Linq;
 using System.Threading.Tasks;
 using FenixAlliance.ABM.Data;
+using FenixAlliance.ABM.Data.Access.Clients;
+using FenixAlliance.ABM.Data.Access.Helpers;
 using FenixAlliance.ABM.Models.DTOs.Components.Holders;
 using FenixAlliance.ABM.Models.DTOs.Components.Social;
 using FenixAlliance.ABM.Models.DTOs.Components.Tenants;
 using FenixAlliance.ABM.Models.DTOs.Responses;
 using FenixAlliance.ABM.Models.DTOs.Responses.Business;
 using FenixAlliance.ABM.Models.Mappers.Social;
-using FenixAlliance.APS.Core.DataAccess;
-using FenixAlliance.APS.Core.DataHelpers;
+using FenixAlliance.APS.Core.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -30,10 +31,10 @@ namespace FenixAlliance.APS.Core.Controllers.Holders
         public StoreHelpers StoreHelpers { get; }
         public IConfiguration Configuration { get; }
         public IHostEnvironment HostEnvironment { get; }
-        public BusinessHelpers BusinessHelpers { get; }
+        public TenantHelpers TenantHelpers { get; }
         public AccountUsersHelpers AccountUsersHelpers { get; }
         public AccountGraphHelpers AccountGraphHelpers { get; }
-        public BusinessDataAccessClient BusinessDataAccess { get; }
+        public TenantDataAccessClient BusinessDataAccess { get; }
         public BlobStorageDataAccessClient StorageDataAccessClient { get; }
 
         public HolderController(ABMContext context, IConfiguration configuration, IHostEnvironment hostingEnvironment)
@@ -42,10 +43,10 @@ namespace FenixAlliance.APS.Core.Controllers.Holders
             Configuration = configuration;
             HostEnvironment = hostingEnvironment;
             StoreHelpers = new StoreHelpers(DataContext);
-            BusinessHelpers = new BusinessHelpers(context);
+            TenantHelpers = new TenantHelpers(context);
             AccountUsersHelpers = new AccountUsersHelpers(context);
             AccountGraphHelpers = new AccountGraphHelpers(DataContext, Configuration);
-            BusinessDataAccess = new BusinessDataAccessClient(DataContext, Configuration, HostEnvironment);
+            BusinessDataAccess = new TenantDataAccessClient(DataContext, Configuration, HostEnvironment);
             StorageDataAccessClient = new BlobStorageDataAccessClient();
         }
 
@@ -61,7 +62,7 @@ namespace FenixAlliance.APS.Core.Controllers.Holders
         public async Task<ActionResult<APIResponse>> GetMe()
         {
 
-            var APIResponse = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
+            var APIResponse = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await ApiAuthorizationHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
             if (APIResponse == null || !APIResponse.Status.Success || APIResponse.Holder == null)
             {
                 return Unauthorized(APIResponse?.Status);
@@ -78,7 +79,7 @@ namespace FenixAlliance.APS.Core.Controllers.Holders
         public async Task<ActionResult<APISocialActivityResponse>> GetMyFollows(int PageSize = 25, int PageIndex = 0)
         {
             // Get Header
-            var APIResponse = JsonConvert.DeserializeObject<APISocialActivityResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
+            var APIResponse = JsonConvert.DeserializeObject<APISocialActivityResponse>(JsonConvert.SerializeObject(await ApiAuthorizationHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
             if (APIResponse == null || !APIResponse.Status.Success || APIResponse.Holder == null)
             {
                 return Unauthorized(APIResponse?.Status);
@@ -130,7 +131,7 @@ namespace FenixAlliance.APS.Core.Controllers.Holders
         public async Task<ActionResult<APISocialActivityResponse>> GetMyFollowers(int PageSize = 25, int PageIndex = 0)
         {
             // Get Header
-            var APIResponse = JsonConvert.DeserializeObject<APISocialActivityResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
+            var APIResponse = JsonConvert.DeserializeObject<APISocialActivityResponse>(JsonConvert.SerializeObject(await ApiAuthorizationHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
             if (APIResponse == null || !APIResponse.Status.Success || APIResponse.Holder == null)
             {
                 return Unauthorized(APIResponse?.Status);
@@ -176,7 +177,7 @@ namespace FenixAlliance.APS.Core.Controllers.Holders
         public async Task<ActionResult<List<Enrollment>>> GetMyBusinesses()
         {
             // Get Header
-            var APIResponse = JsonConvert.DeserializeObject<BusinessEnrollmentsResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
+            var APIResponse = JsonConvert.DeserializeObject<BusinessEnrollmentsResponse>(JsonConvert.SerializeObject(await ApiAuthorizationHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
             if (APIResponse == null || !APIResponse.Status.Success || APIResponse.Holder == null)
             {
                 return Unauthorized(APIResponse?.Status);
@@ -236,7 +237,7 @@ namespace FenixAlliance.APS.Core.Controllers.Holders
         public async Task<ActionResult<APIResponse>> GetMyLibrary()
         {
             // Get Header
-            APIResponse APIResponse = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User).ConfigureAwait(false)));
+            APIResponse APIResponse = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await ApiAuthorizationHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User).ConfigureAwait(false)));
             if (APIResponse == null || !APIResponse.Status.Success || APIResponse.Holder == null)
             {
                 return Unauthorized(APIResponse?.Status);
@@ -251,7 +252,7 @@ namespace FenixAlliance.APS.Core.Controllers.Holders
         public async Task<ActionResult<APIResponse>> GetMyAddresses()
         {
             // Get Header
-            var APIResponse = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
+            var APIResponse = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await ApiAuthorizationHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
             if (APIResponse == null || !APIResponse.Status.Success || APIResponse.Holder == null)
             {
                 return Unauthorized(APIResponse);
@@ -265,7 +266,7 @@ namespace FenixAlliance.APS.Core.Controllers.Holders
         public async Task<ActionResult<List<Notification>>> GetMyNotifications()
         {
             // Get Header
-            var APIResponse = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
+            var APIResponse = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await ApiAuthorizationHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
             if (APIResponse == null || !APIResponse.Status.Success || APIResponse.Holder == null)
             {
                 return Unauthorized(APIResponse?.Status);
@@ -282,7 +283,7 @@ namespace FenixAlliance.APS.Core.Controllers.Holders
         public async Task<ActionResult<APIResponse>> GetMySettings()
         {
             // Get Header
-            var APIResponse = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await APIHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
+            var APIResponse = JsonConvert.DeserializeObject<APIResponse>(JsonConvert.SerializeObject(await ApiAuthorizationHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User)));
             if (APIResponse == null || !APIResponse.Status.Success || APIResponse.Holder == null)
             {
                 return Unauthorized(APIResponse?.Status);
