@@ -22,164 +22,182 @@ namespace FenixAlliance.APS.Core.Helpers
         }
         public string GetActiveDirectoryGUID(ClaimsPrincipal User)
         {
-            string GUID = null;
-            if (User.Identity.IsAuthenticated)
+            string objectIdentifier = null;
+
+            if (User.Identity != null && User.Identity.IsAuthenticated)
             {
-                //CheckValues
-                foreach (Claim claim in User.Claims)
+
+                objectIdentifier = GetActiveDirectoryObjectIdentifier(User) ?? GetActiveDirectoryNameIdentifier(User);
+                var currentHolder = _context.AccountHolder.FirstOrDefault(c => c.ID == objectIdentifier);
+
+                var name = GetActiveDirectoryGivenName(User);
+                var nameIdentifier = GetActiveDirectoryNameIdentifier(User);
+                var lastName = GetActiveDirectorySurName(User);
+                var publicName = GetActiveDirectoryName(User);
+                var email = GetActiveDirectoryEmail(User);
+                var country = GetActiveDirectoryCountry(User);
+                var CountryID = GetCountryID(country) ?? "USA";
+
+                var identityProvider = GetActiveDirectoryIdentityProvider(User);
+                var IdP_AccessToken = GetActiveDirectoryIdentityProviderToken(User);
+
+                // If user not exists in Database
+                if (currentHolder == null)
                 {
-                    if (claim.Type.ToLower().Contains("objectidentifier"))
+                    try
                     {
-                        var name = GetActiveDirectoryGivenName(User);
-                        GUID = GetActiveDirectoryNameIdentifier(User);
-                        var nameIdentifier = GetActiveDirectoryNameIdentifier(User);
-                        var lastName = GetActiveDirectorySurName(User);
-                        var publicName = GetActiveDirectoryName(User);
-                        var email = GetActiveDirectoryEmail(User);
-                        var country = GetActiveDirectoryCountry(User);
-                        var CountryID = GetCountryID(country) ?? "USA";
-                        var identityProvider = GetActiveDirectoryIdentityProvider(User);
-                        var IdP_AccessToken = GetActiveDirectoryIdentityProviderToken(User);
-
-                        // If user not exists in Database
-                        if (!_context.AccountHolder.Any(c => c.ID == GUID))
+                        //Make Temp Object
+                        var Tenant = new AccountHolder
                         {
-                            try
-                            {
-                                //Make Temp Object
-                                var Tenant = new AccountHolder
-                                {
-                                    ID = GUID,
-                                    PublicName = publicName,
-                                    CountryID = CountryID,
-                                    LastName = lastName,
-                                    Name = name,
-                                    Email = email,
-                                    IdentityProvider = identityProvider,
-                                    NameIdentifier = nameIdentifier,
-                                    AccountHolderWallet = new AccountHolderWallet(),
-                                    AccountHolderCart = new AccountHolderCart(),
-                                    SocialProfile = new AccountHolderSocialProfile(),
-                                };
-                                // Adds default Currency
-                                Tenant.AccountHolderCart.CurrencyID = "USD.USA";
-                                _context.AccountHolder.Add(Tenant);
-                                _context.SaveChanges();
+                            ID = objectIdentifier,
+                            PublicName = publicName,
+                            CountryID = CountryID,
+                            LastName = lastName,
+                            Name = name,
+                            Email = email,
+                            IdentityProvider = identityProvider,
+                            NameIdentifier = nameIdentifier,
+                            AccountHolderWallet = new AccountHolderWallet(),
+                            AccountHolderCart = new AccountHolderCart(),
+                            SocialProfile = new AccountHolderSocialProfile(),
+                        };
+                        // Adds default Currency
+                        Tenant.AccountHolderCart.CurrencyID = "USD.USA";
+                        _context.AccountHolder.Add(Tenant);
+                        _context.SaveChanges();
 
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"DbUpdateException from {GUID}: {ex}");
-                            }
-                        }
-                        else
-                        {
-                            try
-                            {
-                                var Holder = _context.AccountHolder.FirstOrDefault(c => c.ID == GUID);
-                                Holder.ID = GUID;
-                                Holder.PublicName = publicName;
-                                Holder.CountryID = CountryID;
-                                Holder.LastName = lastName;
-                                Holder.Name = name;
-                                Holder.Email = email;
-                                Holder.IdentityProvider = identityProvider;
-                                // Update
-                                _context.Update(Holder);
-                                _context.SaveChanges();
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"DbUpdateException from {GUID}: {ex}");
-                            }
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"DbUpdateException from {objectIdentifier}: {ex}");
                     }
                 }
+                else
+                {
+                    ValidateRequiredData(currentHolder, objectIdentifier, publicName, CountryID, lastName, name, email, identityProvider);
+                }
             }
-            return GUID;
+            return objectIdentifier;
         }
 
-        public async Task<string> GetActiveDirectoryGUIDAsync(ClaimsPrincipal User)
+        public async Task<string> GetActiveDirectoryGUIDAsync(ClaimsPrincipal user)
         {
-            string GUID = null;
-            if (User.Identity.IsAuthenticated)
+            string objectIdentifier = null;
+            if (user.Identity != null && user.Identity.IsAuthenticated)
             {
-                //CheckValues
-                foreach (Claim claim in User.Claims)
+
+                objectIdentifier = GetActiveDirectoryObjectIdentifier(user) ?? GetActiveDirectoryNameIdentifier(user);
+                var currentHolder = await _context.AccountHolder.FirstOrDefaultAsync(c => c.ID == objectIdentifier);
+
+                var nameIdentifier = GetActiveDirectoryNameIdentifier(user) ?? GetActiveDirectoryObjectIdentifier(user);
+                var identityProvider = GetActiveDirectoryIdentityProvider(user);
+
+                var name = GetActiveDirectoryGivenName(user);
+                var lastName = GetActiveDirectorySurName(user);
+                var publicName = GetActiveDirectoryName(user);
+                var country = GetActiveDirectoryCountry(user);
+                var email = GetActiveDirectoryEmail(user);
+                var countryId = GetCountryID(country) ?? "USA";
+
+                if (currentHolder == null)
                 {
-                    if (claim.Type.ToLower().Contains("objectidentifier") ||
-                        claim.Type.ToLower().Contains("nameidentifier"))
+                    //Create Account Holder
+
+                    try
                     {
-                        GUID = GetActiveDirectoryNameIdentifier(User);
-                        var name = GetActiveDirectoryGivenName(User);
-                        var nameIdentifier = Guid.NewGuid();
-                        var lastName = GetActiveDirectorySurName(User);
-                        var publicName = GetActiveDirectoryName(User);
-                        var email = GetActiveDirectoryEmail(User);
-                        var country = GetActiveDirectoryCountry(User);
-                        var CountryID = GetCountryID(country) ?? "USA";
-                        var identityProvider = GetActiveDirectoryIdentityProvider(User);
-
-                        // If user not exists in Database
-                        if (!await _context.AccountHolder.AnyAsync(c => c.ID == GUID))
+                        //Make Temp Object
+                        var tenant = new AccountHolder
                         {
-                            try
-                            {
-                                //Make Temp Object
-                                var Tenant = new AccountHolder
-                                {
-                                    ID = GUID,
-                                    PublicName = publicName,
-                                    CountryID = CountryID,
-                                    LastName = lastName,
-                                    Name = name,
-                                    Email = email,
-                                    IdentityProvider = identityProvider,
-                                    NameIdentifier = nameIdentifier.ToString(),
-                                    AccountHolderCart = new AccountHolderCart() { CurrencyID = "USD.USA" },
-                                    AccountHolderWallet = new AccountHolderWallet(),
-                                    SocialProfile = new AccountHolderSocialProfile(),
-                                };
-                                // Adds default Currency
-                                await _context.AccountHolder.AddAsync(Tenant);
-                                await _context.SaveChangesAsync();
+                            ID = objectIdentifier,
+                            PublicName = publicName,
+                            CountryID = countryId,
+                            LastName = lastName,
+                            Name = name,
+                            Email = email,
+                            IdentityProvider = identityProvider,
+                            NameIdentifier = nameIdentifier.ToString(),
+                            AccountHolderCart = new AccountHolderCart() { CurrencyID = "USD.USA" },
+                            AccountHolderWallet = new AccountHolderWallet(),
+                            SocialProfile = new AccountHolderSocialProfile(),
+                        };
+                        // Adds default Currency
+                        await _context.AccountHolder.AddAsync(tenant);
+                        await _context.SaveChangesAsync();
 
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"DbUpdateException from {GUID}: {ex}");
-                            }
-                        }
-                        else
-                        {
-                            try
-                            {
-                                var Holder = await _context.AccountHolder.FirstOrDefaultAsync(c => c.ID == GUID);
-                                Holder.ID = GUID;
-                                Holder.PublicName = publicName;
-                                Holder.CountryID = CountryID;
-                                Holder.LastName = lastName;
-                                Holder.Name = name;
-                                Holder.Email = email;
-                                Holder.IdentityProvider = identityProvider;
-                                // Update
-                                _context.Entry(Holder).State = EntityState.Modified;
-                                await _context.SaveChangesAsync();
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"DbUpdateException from {GUID}: {ex}");
-                            }
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"DbUpdateException from {objectIdentifier}: {ex}");
                     }
                 }
+                else
+                {
+                    ValidateRequiredData(currentHolder, objectIdentifier, publicName, countryId, lastName, name, email, identityProvider);
+                    // Update
+                    _context.Entry(currentHolder).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+                }
             }
-            return GUID;
+            return objectIdentifier;
+        }
+
+        private void ValidateRequiredData(AccountHolder currentHolder, string objectIdentifier, string publicName, string countryId, string lastName, string name, string email, string identityProvider)
+        {
+            // Update Account Holder
+            try
+            {
+                currentHolder.ID = objectIdentifier;
+
+                // If reported property is null or same as record, we need to stick to the old data.
+                if (currentHolder.PublicName == null)
+                    currentHolder.PublicName = publicName;
+
+                if (currentHolder.CountryID == null)
+                    currentHolder.CountryID = countryId;
+
+                if (currentHolder.LastName == null)
+                    currentHolder.LastName = lastName;
+
+                if (currentHolder.Name == null)
+                    currentHolder.Name = name;
+
+                if (currentHolder.Email == null)
+                    currentHolder.Email = email;
+
+                if (currentHolder.IdentityProvider == null)
+                    currentHolder.IdentityProvider = identityProvider;
+
+                // If our identity provider is reporting new data, we need to update this property,
+                if (currentHolder.PublicName != publicName && publicName != null)
+                    currentHolder.PublicName = publicName;
+
+                if (currentHolder.CountryID != countryId && countryId != null)
+                    currentHolder.CountryID = countryId;
+
+                if (currentHolder.LastName != lastName && lastName != null)
+                    currentHolder.LastName = lastName;
+
+                if (currentHolder.Name != name && name != null)
+                    currentHolder.Name = name;
+
+                if (currentHolder.Email != email && email != null)
+                    currentHolder.Email = email;
+
+                if (currentHolder.IdentityProvider != identityProvider && identityProvider != null)
+                    currentHolder.IdentityProvider = identityProvider;
+
+
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DbUpdateException from {objectIdentifier}: {ex}");
+            }
         }
 
         public string GetAndRegisterGUIDByToken(object Token)
         {
-            B2CDecodedToken TokenUser = (B2CDecodedToken) Token;
+            B2CDecodedToken TokenUser = (B2CDecodedToken)Token;
             string GUID = null;
             if (TokenUser != null)
             {
@@ -262,159 +280,62 @@ namespace FenixAlliance.APS.Core.Helpers
             AccountHolder Response = null;
             if (User.Identity.IsAuthenticated)
             {
-                //CheckValues
-                foreach (Claim claim in User.Claims)
+                var objectIdentifier = await GetActiveDirectoryGUIDAsync(User);
+
+                Response = await _context.AccountHolder
+                        .Include(c => c.SocialProfile)
+                        .Include(c => c.AccountHolderWallet)
+                        .Include(c => c.AccountHolderCart).ThenInclude(c => c.Currency)
+                        .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessSocialProfile)
+                        .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessWallet)
+                        .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessCart).ThenInclude(c => c.Currency)
+                        // Get Permissions
+                        .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileSecurityRoleGrants)
+                        .ThenInclude(c => c.BusinessSecurityRole).ThenInclude(c => c.BusinessRolePermissionGrants).ThenInclude(c => c.BusinessPermission)
+                        .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileDirectPermissionGrants).ThenInclude(c => c.BusinessPermission)
+                    .FirstOrDefaultAsync(c => c.ID == objectIdentifier);
+
+
+                if (Response != null)
                 {
-                    if (claim.Type.ToLower().Contains("objectidentifier"))
+                    // Verify & correct required data
+                    Response.AccountHolderCart ??= new AccountHolderCart() { CurrencyID = "USD.USA" };
+
+                    Response.CountryID ??= "USA";
+
+                    Response.SocialProfile ??= new AccountHolderSocialProfile();
+
+                    if (Response.SelectedBusiness != null)
                     {
-                        var GUID = GetActiveDirectoryNameIdentifier(User);
-                        var name = GetActiveDirectoryGivenName(User);
-                        var nameIdentifier = Guid.NewGuid();
-                        var lastName = GetActiveDirectorySurName(User);
-                        var publicName = GetActiveDirectoryName(User);
-                        var email = GetActiveDirectoryEmail(User);
-                        var country = GetActiveDirectoryCountry(User);
-                        var CountryID = GetCountryID(country) ?? "USA";
-                        var identityProvider = GetActiveDirectoryIdentityProvider(User);
+                        Response.SelectedBusiness.BusinessCart ??= new BusinessCart() { CurrencyID = "USD.USA" };
 
-                        if (!await _context.AccountHolder.AnyAsync(c => c.ID == GUID))
-                        {
-                            // If user not exists in Database
-                            try
-                            {
-                                //Make Temp Object
-                                Response = new AccountHolder
-                                {
-                                    ID = GUID,
-                                    PublicName = publicName,
-                                    CountryID = CountryID,
-                                    LastName = lastName,
-                                    Name = name,
-                                    Email = email,
-                                    IdentityProvider = identityProvider,
-                                    NameIdentifier = nameIdentifier.ToString(),
-                                    AccountHolderWallet = new AccountHolderWallet(),
-                                    AccountHolderCart = new AccountHolderCart() { CurrencyID = "USD.USA" },
-                                    SocialProfile = new AccountHolderSocialProfile(),
-                                };
-                                // Adds default Currency
-                                await _context.AccountHolder.AddAsync(Response);
-                                await _context.SaveChangesAsync();
+                        Response.SelectedBusiness.CountryID ??= "USA";
 
-                                // Get the full data object
-                                Response = await _context.AccountHolder
-                                         .Include(c => c.SocialProfile)
-                                         .Include(c => c.AccountHolderWallet)
-                                         .Include(c => c.AccountHolderCart).ThenInclude(c => c.Currency)
-                                         .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessSocialProfile)
-                                         .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessWallet)
-                                         .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessCart).ThenInclude(c => c.Currency)
-                                         // Get Permissions
-                                         .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileSecurityRoleGrants)
-                                                .ThenInclude(c => c.BusinessSecurityRole).ThenInclude(c => c.BusinessRolePermissionGrants).ThenInclude(c => c.BusinessPermission)
-                                         .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileDirectPermissionGrants).ThenInclude(c => c.BusinessPermission)
-                                         .FirstOrDefaultAsync(c => c.ID == GUID);
+                        Response.SelectedBusiness.BusinessWallet ??= new BusinessWallet() { CountryID = "USA" };
 
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"DbUpdateException from {GUID}: {ex}");
-                            }
-                        }
-                        else
-                        {
-                            // If user already exists
-                            try
-                            {
-                                Response = await _context.AccountHolder
-                                    .Include(c => c.SocialProfile)
-                                    .Include(c => c.AccountHolderWallet)
-                                    .Include(c => c.AccountHolderCart).ThenInclude(c => c.Currency)
-                                    .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessSocialProfile)
-                                    .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessWallet)
-                                    .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessCart).ThenInclude(c => c.Currency)
-                                    // Get Permissions
-                                    .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileSecurityRoleGrants)
-                                        .ThenInclude(c => c.BusinessSecurityRole).ThenInclude(c => c.BusinessRolePermissionGrants).ThenInclude(c => c.BusinessPermission)
-                                    .Include(c => c.BusinessProfileRecords).ThenInclude(c => c.BusinessProfileDirectPermissionGrants).ThenInclude(c => c.BusinessPermission)
-                                    .FirstOrDefaultAsync(c => c.ID == GUID);
+                        Response.SelectedBusiness.BusinessSocialProfile ??= new BusinessSocialProfile();
 
-                                Response.ID = GUID;
-                                Response.PublicName = publicName;
-                                Response.CountryID = CountryID;
-                                Response.LastName = lastName;
-                                Response.Name = name;
-                                Response.Email = email;
-                                Response.IdentityProvider = identityProvider;
+                        Response.SelectedBusiness.BusinessIndustryID ??= "Default";
 
-                                if (Response.AccountHolderCart == null)
-                                {
-                                    Response.AccountHolderCart = new AccountHolderCart() { CurrencyID = "USD.USA" };
-                                }
+                        Response.SelectedBusiness.ID ??= "Default";
 
-                                if (String.IsNullOrEmpty(Response.CountryID))
-                                {
-                                    Response.CountryID = "USA";
-                                }
+                        // TODO: Add some non query security verifications for holder auth over current business
+                    }
 
-                                if (Response.SocialProfile == null)
-                                {
-                                    Response.SocialProfile = new AccountHolderSocialProfile();
-                                }
-
-                                if (Response.SelectedBusiness != null)
-                                {
-                                    if (Response.SelectedBusiness.BusinessCart == null)
-                                    {
-                                        Response.SelectedBusiness.BusinessCart = new BusinessCart() { CurrencyID = "USD.USA" };
-                                    }
-
-                                    if (Response.SelectedBusiness.Country == null)
-                                    {
-                                        Response.SelectedBusiness.CountryID = "USA";
-                                    }
-
-                                    if (Response.SelectedBusiness.BusinessWallet == null)
-                                    {
-                                        Response.SelectedBusiness.BusinessWallet = new BusinessWallet() { CountryID = "USA" };
-                                    }
-
-                                    if (Response.SelectedBusiness.BusinessSocialProfile == null)
-                                    {
-                                        Response.SelectedBusiness.BusinessSocialProfile = new BusinessSocialProfile();
-                                    }
-
-                                    if (String.IsNullOrEmpty(Response.SelectedBusiness.BusinessIndustryID))
-                                    {
-                                        Response.SelectedBusiness.BusinessIndustryID = "Default";
-                                    }
-
-                                    if (String.IsNullOrEmpty(Response.SelectedBusiness.ID))
-                                    {
-                                        Response.SelectedBusiness.ID = "1 - 9 Employees";
-                                    }
-
-                                    if (String.IsNullOrEmpty(Response.SelectedBusiness.ID))
-                                    {
-                                        Response.SelectedBusiness.ID = "Default";
-                                    }
-
-                                    //TOOD: Add some non query security verifications for holder auth over current business
-                                }
-
-                                // Update
-                                _context.Entry(Response).State = EntityState.Modified;
-                                await _context.SaveChangesAsync();
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"DbUpdateException from {GUID}: {ex}");
-                                // TODO: Send Email with error details.
-                            }
-                        }
+                    try
+                    {
+                        // Update
+                        _context.Entry(Response).State = EntityState.Modified;
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                        throw;
                     }
                 }
             }
+
             return Response;
         }
 
@@ -432,7 +353,7 @@ namespace FenixAlliance.APS.Core.Helpers
                     }
                 }
             }
-            return "";
+            return null;
         }
 
 
@@ -449,7 +370,24 @@ namespace FenixAlliance.APS.Core.Helpers
                     }
                 }
             }
-            return "";
+            return null;
+        }
+
+
+        public string GetActiveDirectoryObjectIdentifier(ClaimsPrincipal User)
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                //CheckValues
+                foreach (Claim claim in User.Claims)
+                {
+                    if (claim.Type.Contains("objectidentifier"))
+                    {
+                        return claim.Value;
+                    }
+                }
+            }
+            return null;
         }
 
         public string IsNewTenant(ClaimsPrincipal User)
@@ -465,7 +403,7 @@ namespace FenixAlliance.APS.Core.Helpers
                     }
                 }
             }
-            return "";
+            return null;
         }
 
         public string GetActiveDirectorySurName(ClaimsPrincipal User)
@@ -481,7 +419,7 @@ namespace FenixAlliance.APS.Core.Helpers
                     }
                 }
             }
-            return "";
+            return null;
         }
 
         public string GetActiveDirectoryGivenName(ClaimsPrincipal User)
@@ -497,7 +435,7 @@ namespace FenixAlliance.APS.Core.Helpers
                     }
                 }
             }
-            return "";
+            return null;
         }
 
         public string GetActiveDirectoryJobTitle(ClaimsPrincipal User)
@@ -513,7 +451,7 @@ namespace FenixAlliance.APS.Core.Helpers
                     }
                 }
             }
-            return "";
+            return null;
         }
 
         public string GetActiveDirectoryCountry(ClaimsPrincipal User)
@@ -529,7 +467,7 @@ namespace FenixAlliance.APS.Core.Helpers
                     }
                 }
             }
-            return "";
+            return null;
         }
 
 
@@ -546,7 +484,7 @@ namespace FenixAlliance.APS.Core.Helpers
                     }
                 }
             }
-            return "";
+            return null;
         }
 
         public string GetActiveDirectoryIdentityProvider(ClaimsPrincipal User)
@@ -562,7 +500,7 @@ namespace FenixAlliance.APS.Core.Helpers
                     }
                 }
             }
-            return "";
+            return null;
         }
 
         public string GetActiveDirectoryIdentityProviderToken(ClaimsPrincipal User)
@@ -578,7 +516,7 @@ namespace FenixAlliance.APS.Core.Helpers
                     }
                 }
             }
-            return "";
+            return null;
         }
 
         public string GetCountryID(string CountryName)

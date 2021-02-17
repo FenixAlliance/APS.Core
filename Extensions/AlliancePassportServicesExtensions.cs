@@ -166,19 +166,6 @@ namespace FenixAlliance.APS.Core.Extensions
 
             }
             #endregion
-
-            #region GDPR
-            if (Options.ABP.Privacy.Enable)
-            {
-                // Adds Cookies Consent for GDPR Compliance
-                services.Configure<CookiePolicyOptions>(options =>
-                {
-                    // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-                    options.CheckConsentNeeded = context => true;
-                    options.MinimumSameSitePolicy = Microsoft.AspNetCore.Http.SameSiteMode.None;
-                });
-            }
-            #endregion
         }
         public static void UseAlliancePassportServices(this IApplicationBuilder app, IConfiguration Configuration, IHostEnvironment Environment, ISuiteOptions Options)
         {
