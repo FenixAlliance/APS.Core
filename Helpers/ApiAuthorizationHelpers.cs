@@ -31,7 +31,7 @@ namespace FenixAlliance.APS.Core.Helpers
             string EnrollmentID;
             string HolderID;
 
-            var Settings = await _context.Settings.FirstAsync(c => c.SettingsPK == "General");
+            var Settings = await _context.Settings.FirstAsync(c => c.ID == "General");
             var ExchangeRates = JsonConvert.DeserializeObject<CurrencyExchangeRates>(Settings.OpenCurrencyExchangeRates );
 
             var Response = new APIResponse()

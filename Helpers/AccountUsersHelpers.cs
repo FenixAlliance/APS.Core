@@ -22,6 +22,7 @@ namespace FenixAlliance.APS.Core.Helpers
         }
         public string GetActiveDirectoryGUID(ClaimsPrincipal User)
         {
+            // Let's create a string to hold the user's ID.
             string objectIdentifier = null;
 
             if (User.Identity != null && User.Identity.IsAuthenticated)
@@ -87,11 +88,11 @@ namespace FenixAlliance.APS.Core.Helpers
             {
 
                 objectIdentifier = GetActiveDirectoryObjectIdentifier(user) ?? GetActiveDirectoryNameIdentifier(user);
+                var nameIdentifier = GetActiveDirectoryNameIdentifier(user) ?? GetActiveDirectoryObjectIdentifier(user);
+
                 var currentHolder = await _context.AccountHolder.FirstOrDefaultAsync(c => c.ID == objectIdentifier);
 
-                var nameIdentifier = GetActiveDirectoryNameIdentifier(user) ?? GetActiveDirectoryObjectIdentifier(user);
                 var identityProvider = GetActiveDirectoryIdentityProvider(user);
-
                 var name = GetActiveDirectoryGivenName(user);
                 var lastName = GetActiveDirectorySurName(user);
                 var publicName = GetActiveDirectoryName(user);
@@ -115,7 +116,7 @@ namespace FenixAlliance.APS.Core.Helpers
                             Name = name,
                             Email = email,
                             IdentityProvider = identityProvider,
-                            NameIdentifier = nameIdentifier.ToString(),
+                            NameIdentifier = nameIdentifier,
                             AccountHolderCart = new AccountHolderCart() { CurrencyID = "USD.USA" },
                             AccountHolderWallet = new AccountHolderWallet(),
                             SocialProfile = new AccountHolderSocialProfile(),
@@ -500,7 +501,7 @@ namespace FenixAlliance.APS.Core.Helpers
                     }
                 }
             }
-            return null;
+            return "Default";
         }
 
         public string GetActiveDirectoryIdentityProviderToken(ClaimsPrincipal User)

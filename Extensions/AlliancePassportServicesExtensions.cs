@@ -2,8 +2,10 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using FenixAlliance.ABM.Data;
+using FenixAlliance.ABM.Hub.Extensions;
 using FenixAlliance.ACL.Configuration.Enums;
 using FenixAlliance.ACL.Configuration.Interfaces;
+using FenixAlliance.ACL.Configuration.Types;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.AzureAD.UI;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -20,8 +22,17 @@ namespace FenixAlliance.APS.Core.Extensions
 {
     public static class AlliancePassportServicesExtensions
     {
-        public static void AddAlliancePassportServices(this IServiceCollection services, IConfiguration Configuration, IHostEnvironment Environment, ISuiteOptions Options)
+        public static void AddAlliancePassportServices(this IServiceCollection services, IConfiguration Configuration, IHostEnvironment Environment, ISuiteOptions Options = null)
         {
+            // Making sure we have our deserialized options
+            if (Options == null)
+                Options = SuiteOptions.DeserializeOptionsFromFileStatic();
+
+            // Make sure we already have an ABM Service
+            if(!services.Any(s=>s.ServiceType == typeof(ABMContext)))
+            {
+                services.AddAllianceBusinessModelServices(Configuration, Environment, Options);
+            }
             #region Auth
 
             if (Options.APS.Enable)
@@ -167,8 +178,10 @@ namespace FenixAlliance.APS.Core.Extensions
             }
             #endregion
         }
-        public static void UseAlliancePassportServices(this IApplicationBuilder app, IConfiguration Configuration, IHostEnvironment Environment, ISuiteOptions Options)
+        public static void UseAlliancePassportServices(this IApplicationBuilder app, IConfiguration Configuration, IHostEnvironment Environment, ISuiteOptions Options = null)
         {
+            if (Options == null)
+                Options = SuiteOptions.DeserializeOptionsFromFileStatic();
 
             if (Options.APS.Enable)
             {
