@@ -207,7 +207,7 @@ namespace FenixAlliance.APS.Core.Controllers.Auth
                             sub = Enrollment.ID,
                             aud = AudienceSchema,
                             act = Enrollment.BusinessID,
-                            aid = Enrollment.AccountHolderGUID,
+                            aid = Enrollment.AccountHolderID,
                             cid = SecretsSet.BusinessApplication.ID,
                             iss = $"https://fenixalliance.com.co/api/v2/oauth2/{SecretsSet.BusinessApplication.BusinessID}/{SecretsSet.BusinessApplication.ID}/",
                             Scopes = requested_scopes.Split(" ").ToList(),

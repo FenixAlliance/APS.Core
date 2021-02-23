@@ -225,7 +225,7 @@ namespace FenixAlliance.APS.Core.Controllers.Tenants
             var GUID = AccountUsersHelpers.GetActiveDirectoryGUID(User);
 
             // If no BPR, not authorized.
-            var BPR = await DataContext.BusinessProfileRecord.AsNoTracking().Where(c => c.AccountHolderGUID == GUID && c.BusinessID == TenantID).FirstAsync();
+            var BPR = await DataContext.BusinessProfileRecord.AsNoTracking().Where(c => c.AccountHolderID == GUID && c.BusinessID == TenantID).FirstAsync();
             if (BPR == null)
             {
                 return Unauthorized();
