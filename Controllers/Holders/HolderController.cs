@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using FenixAlliance.ABM.Data;
+﻿using FenixAlliance.ABM.Data;
 using FenixAlliance.ABM.Data.Access.Clients;
 using FenixAlliance.ABM.Data.Access.Helpers;
 using FenixAlliance.ABM.Models.DTOs.Components.Holders;
@@ -17,6 +14,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace FenixAlliance.APS.Core.Controllers.Holders
 {
@@ -24,7 +24,7 @@ namespace FenixAlliance.APS.Core.Controllers.Holders
     [Route("api/v2/Me")]
     [ApiExplorerSettings(GroupName = "Holders")]
     [Produces("application/json", "application/xml")]
-    [Consumes("application/json", "application/xml" )]
+    [Consumes("application/json", "application/xml")]
     public class HolderController : ControllerBase
     {
         public ABMContext DataContext { get; }

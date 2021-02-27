@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using FenixAlliance.ABM.Data;
+﻿using FenixAlliance.ABM.Data;
+using FenixAlliance.ABM.Data.Interfaces.Helpers;
 using FenixAlliance.ABM.Models.DTOs.Authorization;
 using FenixAlliance.ABM.Models.DTOs.Components.Global.Currencies;
 using FenixAlliance.ABM.Models.DTOs.Components.Tenants;
@@ -18,7 +11,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using FenixAlliance.ABM.Data.Interfaces.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace FenixAlliance.APS.Core.Helpers
 {
@@ -32,7 +32,7 @@ namespace FenixAlliance.APS.Core.Helpers
             string HolderID;
 
             var Settings = await _context.Settings.FirstAsync(c => c.ID == "General");
-            var ExchangeRates = JsonConvert.DeserializeObject<CurrencyExchangeRates>(Settings.OpenCurrencyExchangeRates );
+            var ExchangeRates = JsonConvert.DeserializeObject<CurrencyExchangeRates>(Settings.OpenCurrencyExchangeRates);
 
             var Response = new APIResponse()
             {
@@ -141,7 +141,8 @@ namespace FenixAlliance.APS.Core.Helpers
                                 Response.Holder = null;
                                 Response.Application = null;
                                 Response.Status.Success = false;
-                                Response.Status.Error = new Error() { 
+                                Response.Status.Error = new Error()
+                                {
                                     ID = "E05",
                                     Description = "Cannot validate client's identity. Decryption went wrong."
                                 };
@@ -269,7 +270,7 @@ namespace FenixAlliance.APS.Core.Helpers
                     Response.Holder.CurrencyISO = AccountHolder.AccountHolderCart.Currency.ISOCode ?? "USD";
                     Response.Holder.CurrencyID = AccountHolder.AccountHolderCart.Currency.ID ?? "USD.USA";
                     Response.Holder.CountryFlag = AccountHolder.Country.CountryFlagUrl;
-                    Response.Holder.CurrencyExchange = ExchangeRates.Rates.First(c=>c.Key == (AccountHolder.AccountHolderCart.Currency.ISOCode ?? "USD")).Value;
+                    Response.Holder.CurrencyExchange = ExchangeRates.Rates.First(c => c.Key == (AccountHolder.AccountHolderCart.Currency.ISOCode ?? "USD")).Value;
                 }
 
                 if (Business != null)

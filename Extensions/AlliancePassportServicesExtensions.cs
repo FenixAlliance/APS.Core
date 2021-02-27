@@ -1,7 +1,4 @@
-﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using FenixAlliance.ABM.Data;
+﻿using FenixAlliance.ABM.Data;
 using FenixAlliance.ABM.Hub.Extensions;
 using FenixAlliance.ACL.Configuration.Enums;
 using FenixAlliance.ACL.Configuration.Interfaces;
@@ -17,6 +14,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 
 namespace FenixAlliance.APS.Core.Extensions
 {
@@ -29,7 +29,7 @@ namespace FenixAlliance.APS.Core.Extensions
                 Options = SuiteOptions.DeserializeOptionsFromFileStatic();
 
             // Make sure we already have an ABM Service
-            if(!services.Any(s=>s.ServiceType == typeof(ABMContext)))
+            if (!services.Any(s => s.ServiceType == typeof(ABMContext)))
             {
                 services.AddAllianceBusinessModelServices(Configuration, Environment, Options);
             }

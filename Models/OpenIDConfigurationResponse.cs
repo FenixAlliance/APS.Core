@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace FenixAlliance.APS.Core.Models
 {
@@ -43,5 +43,5 @@ namespace FenixAlliance.APS.Core.Models
         public List<string> ClaimsSupported { get; set; }
     }
 
-   
+
 }

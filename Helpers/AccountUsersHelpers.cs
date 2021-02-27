@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using FenixAlliance.ABM.Data;
+﻿using FenixAlliance.ABM.Data;
 using FenixAlliance.ABM.Data.Interfaces.Helpers;
 using FenixAlliance.ABM.Models.Global.Carts.CartScopes;
 using FenixAlliance.ABM.Models.Global.Wallets.WalletAccountScopes;
@@ -10,6 +6,10 @@ using FenixAlliance.ABM.Models.Holders;
 using FenixAlliance.ABM.Models.Social.SocialProfiles.Scopes;
 using FenixAlliance.APS.Core.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace FenixAlliance.APS.Core.Helpers
 {

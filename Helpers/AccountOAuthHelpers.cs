@@ -1,16 +1,16 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
-using FenixAlliance.ABM.Models.DTOs.Authorization;
+﻿using FenixAlliance.ABM.Models.DTOs.Authorization;
 using FenixAlliance.ABM.Models.DTOs.Components.Holders;
 using FenixAlliance.ABM.Models.DTOs.Responses;
 using FenixAlliance.APS.Core.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace FenixAlliance.APS.Core.Helpers
 {
@@ -111,7 +111,7 @@ namespace FenixAlliance.APS.Core.Helpers
             try
             {
                 var AuthHeader = request.Headers.FirstOrDefault(x => x.Key.ToLowerInvariant() == "authorization").Value.FirstOrDefault();
-                if(AuthHeader.Split(' ')[0].ToLowerInvariant() == "bearer")
+                if (AuthHeader.Split(' ')[0].ToLowerInvariant() == "bearer")
                 {
                     Token = AuthHeader.Split(' ')[1];
                 }
@@ -130,7 +130,7 @@ namespace FenixAlliance.APS.Core.Helpers
                 var AuthHeader = Request.Headers.FirstOrDefault(x => x.Key.ToLowerInvariant() == "authorization");
                 var AuthTypeKey = AuthHeader.Key;
                 var AuthTypeValue = AuthHeader.Value;
-               var AuthTypeValueString =  AuthTypeValue.ToString();
+                var AuthTypeValueString = AuthTypeValue.ToString();
                 var ToReturn = AuthTypeValueString.Split(' ')[0].ToLowerInvariant();
                 return ToReturn;
             }

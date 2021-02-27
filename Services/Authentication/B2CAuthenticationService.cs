@@ -1,11 +1,11 @@
-﻿using System;
+﻿using FenixAlliance.APS.Core.Interfaces;
+using Microsoft.Identity.Client;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FenixAlliance.APS.Core.Interfaces;
-using Microsoft.Identity.Client;
-using Newtonsoft.Json.Linq;
 
 namespace FenixAlliance.APS.Core.Services.Authentication
 {

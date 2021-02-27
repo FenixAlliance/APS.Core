@@ -1,11 +1,11 @@
-﻿using System.Threading.Tasks;
-using FenixAlliance.ABM.Data;
+﻿using FenixAlliance.ABM.Data;
 using FenixAlliance.ABM.Data.Access.Clients;
 using FenixAlliance.ABM.Data.Access.Helpers;
 using FenixAlliance.APS.Core.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using System.Threading.Tasks;
 
 namespace FenixAlliance.APS.Core.Controllers.Auth
 {

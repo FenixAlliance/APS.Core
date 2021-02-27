@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using FenixAlliance.ABM.Data;
+﻿using FenixAlliance.ABM.Data;
 using FenixAlliance.ABM.Data.Access.Clients;
 using FenixAlliance.ABM.Data.Access.Helpers;
 using FenixAlliance.ABM.Models.DTOs.Components.Social;
@@ -17,13 +13,17 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace FenixAlliance.APS.Core.Controllers.Tenants
 {
     [ApiController]
     [Route("api/v2/[controller]")]
     [ApiExplorerSettings(GroupName = "Tenants")]
-    [Produces("application/json", "application/xml" )]
+    [Produces("application/json", "application/xml")]
     [Consumes("application/json", "application/xml")]
     public class TenantsController : ControllerBase
     {

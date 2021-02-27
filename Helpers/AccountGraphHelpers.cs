@@ -1,10 +1,10 @@
-﻿using System.Security.Claims;
-using System.Threading.Tasks;
-using FenixAlliance.ABM.Data;
+﻿using FenixAlliance.ABM.Data;
 using FenixAlliance.ABM.Data.Interfaces.Helpers;
 using FenixAlliance.APS.Core.Models;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace FenixAlliance.APS.Core.Helpers
 {

@@ -1,10 +1,10 @@
-﻿using System;
+﻿using FenixAlliance.ABM.Models.DTOs.Components.Store.Products;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using FenixAlliance.ABM.Models.DTOs.Components.Store.Products;
-using Newtonsoft.Json;
 
 namespace FenixAlliance.APS.Core.Services
 {

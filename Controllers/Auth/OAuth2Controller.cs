@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using FenixAlliance.ABM.Data;
+﻿using FenixAlliance.ABM.Data;
 using FenixAlliance.ABM.Data.Access.Clients;
 using FenixAlliance.ABM.Data.Access.Helpers;
 using FenixAlliance.ABM.Models.DTOs.Authorization;
@@ -19,6 +12,13 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace FenixAlliance.APS.Core.Controllers.Auth
 {
@@ -142,17 +142,17 @@ namespace FenixAlliance.APS.Core.Controllers.Auth
                             .FirstAsync(c => c.ID == EnrollmentID);
 
                         var RequiredAppPermissions = SecretsSet.BusinessApplication.BusinessApplicationRequestedPermissions.Where(c => c.IsOptional == false).Select(c => c.BusinessPermission).Select(c => c.ID).ToList();
-                        
+
                         // 5. Assert the existence of each and every requested scope within the context of a particular tenant. (A.K.A Granted for the entire organization)
                         var GrantedAppPermissionsThroughRoles = SecretsSet.BusinessApplication.BusinessApplicationSecurityRoleGrants.Where(c => c.BusinessSecurityRole.BusinessID == Enrollment.BusinessID).Select(c => c.BusinessSecurityRole).SelectMany(c => c.BusinessRolePermissionGrants).Select(c => c.BusinessPermission);
-                        
+
                         var GrantedAppDirectPermissions = SecretsSet.BusinessApplication
                             .BusinessApplicationPermissionGrants.Where(c => c.BusinessID == Enrollment.BusinessID)
                             .Select(c => c.BusinessPermission);
-                        
+
                         var ApplicationPermissions = GrantedAppPermissionsThroughRoles.Union(GrantedAppDirectPermissions).Select(c => c.ID);
 
-                        var applicationPermissions = (string[]) ApplicationPermissions;
+                        var applicationPermissions = (string[])ApplicationPermissions;
                         var PermissionsRequestedButNotGranted = RequiredAppPermissions.Except(applicationPermissions.ToList());
 
                         if (PermissionsRequestedButNotGranted.Any())

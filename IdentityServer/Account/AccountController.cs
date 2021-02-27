@@ -1,8 +1,5 @@
 
 
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using IdentityModel;
 using IdentityServer4;
 using IdentityServer4.Events;
@@ -15,6 +12,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace FenixAlliance.APS.Core.IdentityServer.Account
 {
@@ -166,7 +166,7 @@ namespace FenixAlliance.APS.Core.IdentityServer.Account
                     }
                 }
 
-                await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials", clientId:context?.Client.ClientId));
+                await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials", clientId: context?.Client.ClientId));
                 ModelState.AddModelError(string.Empty, AccountOptions.InvalidCredentialsErrorMessage);
             }
 
@@ -175,7 +175,7 @@ namespace FenixAlliance.APS.Core.IdentityServer.Account
             return View(vm);
         }
 
-        
+
         /// <summary>
         /// Show logout page
         /// </summary>

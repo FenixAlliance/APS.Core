@@ -1,16 +1,16 @@
-﻿using System;
+﻿using FenixAlliance.ABM.Models.DTOs.Components.Accounting.Billing;
+using FenixAlliance.ABM.Models.DTOs.Components.Contacts;
+using FenixAlliance.ABM.Models.DTOs.Components.Social;
+using FenixAlliance.ABM.Models.DTOs.Components.Store.Carts;
+using FenixAlliance.ABM.Models.DTOs.Requests.Store;
+using FenixAlliance.APS.Core.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using FenixAlliance.ABM.Models.DTOs.Components.Accounting.Billing;
-using FenixAlliance.ABM.Models.DTOs.Components.Contacts;
-using FenixAlliance.ABM.Models.DTOs.Components.Social;
-using FenixAlliance.ABM.Models.DTOs.Components.Store.Carts;
-using FenixAlliance.ABM.Models.DTOs.Requests.Store;
-using FenixAlliance.APS.Core.Interfaces;
 
 namespace FenixAlliance.APS.Core.Services
 {

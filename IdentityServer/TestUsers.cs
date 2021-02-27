@@ -1,11 +1,11 @@
 ﻿
 
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Text.Json;
 using IdentityModel;
 using IdentityServer4;
 using IdentityServer4.Test;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace FenixAlliance.APS.Core.IdentityServer
 {
@@ -22,7 +22,7 @@ namespace FenixAlliance.APS.Core.IdentityServer
                     postal_code = 69118,
                     country = "Germany"
                 };
-                
+
                 return new List<TestUser>
                 {
                     new TestUser

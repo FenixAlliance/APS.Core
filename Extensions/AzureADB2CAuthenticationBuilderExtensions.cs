@@ -1,12 +1,12 @@
-﻿using System;
-using System.Threading.Tasks;
-using FenixAlliance.APS.Core.Models;
+﻿using FenixAlliance.APS.Core.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Threading.Tasks;
 
 namespace FenixAlliance.APS.Core.Extensions
 {

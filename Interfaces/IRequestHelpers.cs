@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using FenixAlliance.ABM.Models.DTOs.Components.Accounting.Billing;
+﻿using FenixAlliance.ABM.Models.DTOs.Components.Accounting.Billing;
 using FenixAlliance.ABM.Models.DTOs.Components.Contacts;
 using FenixAlliance.ABM.Models.DTOs.Components.Social;
 using FenixAlliance.ABM.Models.DTOs.Components.Store.Carts;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace FenixAlliance.APS.Core.Interfaces
 {

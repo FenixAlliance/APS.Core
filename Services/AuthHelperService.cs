@@ -1,14 +1,14 @@
-﻿using System;
+﻿using FenixAlliance.ABM.Models.DTOs.Authorization;
+using FenixAlliance.ACL.Configuration.Interfaces;
+using FenixAlliance.APS.Core.Interfaces;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
-using FenixAlliance.ABM.Models.DTOs.Authorization;
-using FenixAlliance.ACL.Configuration.Interfaces;
-using FenixAlliance.APS.Core.Interfaces;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 
 namespace FenixAlliance.APS.Core.Services
 {

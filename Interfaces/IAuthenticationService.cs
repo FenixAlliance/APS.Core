@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using FenixAlliance.APS.Core.Services.Authentication;
+﻿using FenixAlliance.APS.Core.Services.Authentication;
+using System.Threading.Tasks;
 
 namespace FenixAlliance.APS.Core.Interfaces
 {
