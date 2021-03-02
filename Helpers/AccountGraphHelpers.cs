@@ -1,6 +1,8 @@
 ﻿using FenixAlliance.ABM.Data;
 using FenixAlliance.ABM.Data.Interfaces.Helpers;
+using FenixAlliance.ACL.Configuration.Interfaces;
 using FenixAlliance.APS.Core.Models;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System.Security.Claims;
@@ -8,23 +10,28 @@ using System.Threading.Tasks;
 
 namespace FenixAlliance.APS.Core.Helpers
 {
+    // We could make this a service. In fact, I'm doing it ASAP.
     public class AccountGraphHelpers : IAccountGraphHelpers
     {
-        private readonly ABMContext _context;
+        private ABMContext DataContext { get; set; } 
         public IAccountUsersHelpers AccountTools { get; set; }
-        private readonly IConfiguration _configuration;
+        public  ISuiteOptions SuiteOptions { get; set; }
+
+        private readonly IConfiguration Configuration;
 
 
-        public AccountGraphHelpers(ABMContext context, IConfiguration configuration)
+        public AccountGraphHelpers(ABMContext context, IConfiguration configuration, ISuiteOptions SuiteOptions, IWebHostEnvironment Environment)
         {
-            _context = context;
-            _configuration = configuration;
+            DataContext = context;
+            Configuration = configuration;
+            this.SuiteOptions = SuiteOptions;
             AccountTools = new AccountUsersHelpers(context);
         }
 
         public IAADB2CGraphHelpers GetB2CGraphClient()
         {
-            var ADGraphSettings = _configuration.GetSection("ADGraphSettings");
+            // ToDo: Use ISuiteOptions instead
+            var ADGraphSettings = Configuration.GetSection("ADGraphSettings");
 
             return new AADB2CGraphHelpers(ADGraphSettings.GetValue<string>("ClientId"),
                 ADGraphSettings.GetValue<string>("ClientSecret"),
@@ -36,7 +43,7 @@ namespace FenixAlliance.APS.Core.Helpers
             // Get users's GUID.
             var GUID = AccountTools.GetActiveDirectoryGUID(User);
             // Get ADGraph client
-            var ADGraphSettings = _configuration.GetSection("ADSecurityGroup");
+            var ADGraphSettings = Configuration.GetSection("ADSecurityGroup");
             var GroupID = ADGraphSettings.GetValue<string>(RoleName);
             AADB2CGraphHelpers client = (AADB2CGraphHelpers)GetB2CGraphClient();
             return IsMemberOf(GUID, GroupID, client);
@@ -45,7 +52,7 @@ namespace FenixAlliance.APS.Core.Helpers
         public Task<bool> IsInSecurityGroupByGUID(string RoleName, string GUID)
         {
             // Get ADGraph client
-            var ADGraphSettings = _configuration.GetSection("ADSecurityGroup");
+            var ADGraphSettings = Configuration.GetSection("ADSecurityGroup");
             var GroupID = ADGraphSettings.GetValue<string>(RoleName);
             AADB2CGraphHelpers client = (AADB2CGraphHelpers)GetB2CGraphClient();
             return IsMemberOf(GUID, GroupID, client);

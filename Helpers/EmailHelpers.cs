@@ -1,17 +1,29 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using FenixAlliance.ABM.Data;
+using FenixAlliance.ACL.Configuration.Interfaces;
+using FenixAlliance.APS.Core.Interfaces;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using System.Threading.Tasks;
 
 namespace FenixAlliance.APS.Core.Helpers
 {
-    public class EmailHelpers
+    public class EmailHelpers : ISmtpService
     {
-        private readonly IConfiguration _configuration;
+        private IConfiguration Configuration { get; set; }
+        private ISuiteOptions SuiteOptions { get; set; }
+        private IWebHostEnvironment Environment { get; set; }
+        private ABMContext DataContext { get; set; }
 
-        public EmailHelpers(IConfiguration configuration)
+
+
+        public EmailHelpers(IConfiguration Configuration, ISuiteOptions SuiteOptions, IWebHostEnvironment Environment, ABMContext DataContext)
         {
-            _configuration = configuration;
+            this.Configuration = Configuration;
+            this.SuiteOptions = SuiteOptions;
+            this.DataContext = DataContext;
+            this.Environment = Environment;
         }
 
         public async Task SendEmailAsync(string email, string subject, string message, string name, bool markedForRevision)
@@ -21,7 +33,7 @@ namespace FenixAlliance.APS.Core.Helpers
 
         public async Task Execute(string subject, string message, string email, string name, bool markedForRevision)
         {
-            var SendgridConfig = _configuration.GetSection("Sendgrid");
+            var SendgridConfig = Configuration.GetSection("Sendgrid");
             var apiKey = SendgridConfig.GetValue<string>("ApiKey");
             var client = new SendGridClient(apiKey);
             var msg = new SendGridMessage();

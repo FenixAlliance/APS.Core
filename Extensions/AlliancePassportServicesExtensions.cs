@@ -3,6 +3,7 @@ using FenixAlliance.ABM.Hub.Extensions;
 using FenixAlliance.ACL.Configuration.Enums;
 using FenixAlliance.ACL.Configuration.Interfaces;
 using FenixAlliance.ACL.Configuration.Types;
+using FenixAlliance.APS.Core.Helpers;
 using FenixAlliance.APS.Core.Interfaces;
 using FenixAlliance.APS.Core.Services.Authorization;
 using Microsoft.AspNetCore.Authentication;
@@ -181,6 +182,19 @@ namespace FenixAlliance.APS.Core.Extensions
                 }
 
                 // Adding authorization service
+                services.AddScoped<AccountUsersHelpers>();
+                services.AddScoped<AccountGraphHelpers>();
+                services.AddScoped<AccountOAuthHelpers>();
+                // services.AddScoped<AADB2CGraphHelpers>(); // Not yet ready to be a Service.
+
+                // Adding SMTP Client Service
+                services.AddSingleton<ISmtpService, EmailHelpers>();
+
+                // Adds DnsClient.
+                services.AddSingleton<IDnsHelperService, DnsHelperService>();
+
+
+                services.AddTransient<AuthenticationService>();
                 services.AddTransient<IAuthorizationService, AuthorizationService>();
 
             }

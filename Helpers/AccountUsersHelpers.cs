@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace FenixAlliance.APS.Core.Helpers
 {
+    // ToDo: Document this Class. (God, please no.... )
     public class AccountUsersHelpers : IAccountUsersHelpers
     {
         private readonly ABMContext _context;

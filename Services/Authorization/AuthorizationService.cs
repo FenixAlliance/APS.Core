@@ -30,29 +30,34 @@ namespace FenixAlliance.APS.Core.Services.Authorization
         public string AuthEndpoint { get; set; }
         public bool IsAuthorized { get; set; }
 
-        public AuthorizationService(ABMContext DataContext, IConfiguration configuration, IHostEnvironment hostingEnvironment, ISuiteOptions Options)
+        public AuthorizationService(ABMContext DataContext, IConfiguration Configuration, IHostEnvironment Environment, ISuiteOptions Options)
         {
             this.DataContext = DataContext;
-            Environment = hostingEnvironment;
-            Configuration = configuration;
+            this.Environment = Environment;
+            this.Configuration = Configuration;
+
             Scopes = Options?.ABS?.Portal?.Scopes;
             PublicKey = Options?.ABS?.Portal?.PublicKey;
             PrivateKey = Options?.ABS?.Portal?.PrivateKey;
             BaseEndpoint = Options?.ABS?.Portal?.BaseEndpoint;
+
             AuthEndpoint = $"https://{BaseEndpoint}/api/v2/OAuth2/Token?client_id={PublicKey}&client_secret={PrivateKey}&grant_type=client_credentials&requested_scopes={Scopes}";
             HttpClient = new HttpClient() { BaseAddress = new Uri($"https://{BaseEndpoint ?? "rest.absuite.net" }/api/v2/") };
             HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
         /// <summary>
-        /// This method retuirns true if the current user is authenticated, has a selected BusinessID (Whih means a valid Business Profile Record) 
+        /// This method returns true if the current user is authenticated, has a selected BusinessID (Whih means a valid Business Profile Record) 
         /// AND it has either the Business Owner Property set to true or the business_owner role.
         /// </summary>
         /// <param name="User">The user to inspect.</param>
         /// <returns></returns>
         public async Task<bool> IsAdmin(ClaimsPrincipal User)
         {
-
+            if (User.Identity.IsAuthenticated)
+            {
+                //await DataContext.
+            }
             return false;
         }
 
