@@ -3,6 +3,8 @@ using FenixAlliance.ABM.Hub.Extensions;
 using FenixAlliance.ACL.Configuration.Enums;
 using FenixAlliance.ACL.Configuration.Interfaces;
 using FenixAlliance.ACL.Configuration.Types;
+using FenixAlliance.APS.Core.Interfaces;
+using FenixAlliance.APS.Core.Services.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.AzureAD.UI;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -141,6 +143,7 @@ namespace FenixAlliance.APS.Core.Extensions
                     {
                         if (!Options?.APS?.AzureADB2C?.DefaultProvider ?? false)
                         {
+                            // ToDo: Use MicrosoftWebIdentity Instead.
                             services.AddAuthentication(AzureADDefaults.AuthenticationScheme)
                                 .AddAzureAD(options => Configuration.Bind(
                                     $"APS:{Options.APS.Provider}",
@@ -164,6 +167,8 @@ namespace FenixAlliance.APS.Core.Extensions
                                 })
                                 .AddAzureAdB2C(options =>
                                 {
+                                    // ToDo: Use ISuiteOptions. Problem: this was kindda of a hack. 😅
+
                                     Configuration.Bind($"APS:{Options.APS.Provider}", options);
                                 })
                                 //.AddAzureADB2CBearer(options => Configuration.Bind("AzureAdB2C", options))
@@ -175,11 +180,16 @@ namespace FenixAlliance.APS.Core.Extensions
                     }
                 }
 
+                // Adding authorization service
+                services.AddTransient<IAuthorizationService, AuthorizationService>();
+
             }
             #endregion
         }
         public static void UseAlliancePassportServices(this IApplicationBuilder app, IConfiguration Configuration, IHostEnvironment Environment, ISuiteOptions Options = null)
         {
+            // Just checking out that our configuration file does infact exists.
+            // ?: Should this happen only if Options.APS.Enable is set to true?  We'll see...
             if (Options == null)
                 Options = SuiteOptions.DeserializeOptionsFromFileStatic();
 
