@@ -1,9 +1,15 @@
-﻿using FenixAlliance.ABM.Models.DTOs.Authorization;
+﻿using FenixAlliance.ABM.Data.Interfaces.Helpers;
+using FenixAlliance.ABM.Models.DTOs.Auth;
+using FenixAlliance.ABM.Models.DTOs.Auth.AADB2C;
+using FenixAlliance.ABM.Models.DTOs.Auth.OAuth2;
+using FenixAlliance.ABM.Models.DTOs.Auth.OpenID;
 using FenixAlliance.ABM.Models.DTOs.Components.Holders;
 using FenixAlliance.ABM.Models.DTOs.Responses;
-using FenixAlliance.APS.Core.Models;
+using FenixAlliance.ACL.Configuration.Interfaces;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,25 +22,44 @@ namespace FenixAlliance.APS.Core.Helpers
 {
     public class AccountOAuthHelpers
     {
-        public AccountUsersHelpers UserHelpers;
-        private static readonly HttpClient client = new HttpClient();
 
-        private static readonly string MeEndpoint = "https://fenixalliance.com.co/api/V2/me";
-        private static readonly string BusinessEndpoint = "https://fenixalliance.com.co/api/V2/Tenants/{0}/AppAuthorization";
+        private ISuiteOptions SuiteOptions { get; set; }
+        private IConfiguration Configuration { get; set; }
+        private IWebHostEnvironment Environment { get; set; }
+        private IHttpClientFactory HttpClientFactory { get; set; }
+        private IAccountUsersHelpers AccountUsersHelpers { get; set; }
+        private HttpClient HttpClient { get; set; } = new HttpClient();
 
-        public static async Task<string> GetAndRegisterGUIDByRequestAsync(HttpRequest request, AccountUsersHelpers _accountUsersHelpers)
+        private string MeEndpoint { get; set; } = "https://fenixalliance.com.co/api/V2/me";
+        private string BusinessEndpoint { get; set; }  = "https://fenixalliance.com.co/api/V2/Tenants/{0}/AppAuthorization";
+
+
+
+        public AccountOAuthHelpers(ISuiteOptions SuiteOptions, IConfiguration Configuration, IWebHostEnvironment Environment, IAccountUsersHelpers AccountUsersHelpers, IHttpClientFactory HttpClientFactory)
         {
-            var Token = AccountOAuthHelpers.ExtractAuthToken(request);
-            var DecodedToken = await AccountOAuthHelpers.DecodeAndValidateOAuthTokenAsync(Token);
+            this.HttpClient = HttpClientFactory.CreateClient();
+            this.AccountUsersHelpers = AccountUsersHelpers;
+            this.HttpClientFactory = HttpClientFactory;
+            this.Configuration = Configuration;
+            this.SuiteOptions = SuiteOptions;
+            this.Environment = Environment;
+        }
+
+
+
+        public async Task<string> GetAndRegisterGUIDByRequestAsync(HttpRequest request, AccountUsersHelpers _accountUsersHelpers)
+        {
+            var Token = ExtractAuthToken(request);
+            var DecodedToken = await DecodeAndValidateOAuthTokenAsync(Token);
             return _accountUsersHelpers.GetAndRegisterGUIDByToken(DecodedToken);
         }
 
-        public static async Task<Holder> GetAccountHolderByTokenAsync(string Token)
+        public async Task<Holder> GetAccountHolderByTokenAsync(string Token)
         {
-            var DecodedToken = await AccountOAuthHelpers.DecodeAndValidateOAuthTokenAsync(Token);
+            var DecodedToken = await DecodeAndValidateOAuthTokenAsync(Token);
 
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
-            var Holder = JsonConvert.DeserializeObject<Holder>(await client.GetStringAsync(MeEndpoint));
+            HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+            var Holder = JsonConvert.DeserializeObject<Holder>(await HttpClient.GetStringAsync(MeEndpoint));
 
             // Check 
             if (DecodedToken.Oid.ToString() != Holder.ID)
@@ -45,15 +70,15 @@ namespace FenixAlliance.APS.Core.Helpers
             return Holder;
         }
 
-        public static async Task<ClientApplication> GetBusinessTenantApplicationByApiKeyAsync(string ApiKey)
+        public async Task<ClientApplication> GetBusinessTenantApplicationByApiKeyAsync(string ApiKey)
         {
 
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("ApiKey", ApiKey);
-            return JsonConvert.DeserializeObject<ClientApplication>(await client.GetStringAsync(BusinessEndpoint));
+            HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("ApiKey", ApiKey);
+            return JsonConvert.DeserializeObject<ClientApplication>(await HttpClient.GetStringAsync(BusinessEndpoint));
         }
 
 
-        private static async Task<B2CDecodedToken> DecodeAndValidateOAuthTokenAsync(string Token)
+        private async Task<B2CDecodedToken> DecodeAndValidateOAuthTokenAsync(string Token)
         {
             var TokenComponents = Token.Split('.');
             var TokenHeader = TokenComponents[0];
@@ -78,10 +103,10 @@ namespace FenixAlliance.APS.Core.Helpers
             foreach (var Endpoint in OpenIDEndpoints)
             {
                 // Lookup Configuration
-                string _OpenIdConfigurationResponse = await client.GetStringAsync(Endpoint);
+                string _OpenIdConfigurationResponse = await HttpClient.GetStringAsync(Endpoint);
                 var ConfigurationResponse = JsonConvert.DeserializeObject<OpenIdConfigurationResponse>(_OpenIdConfigurationResponse);
                 // Lookup Keys
-                string _KeysLookupResponse = await client.GetStringAsync(ConfigurationResponse.JwksUri);
+                string _KeysLookupResponse = await HttpClient.GetStringAsync(ConfigurationResponse.JwksUri);
                 var KeysRequestResponse = JsonConvert.DeserializeObject<KeysLookupResponse>(_KeysLookupResponse);
 
                 foreach (var Key in KeysRequestResponse.Keys)
@@ -105,7 +130,7 @@ namespace FenixAlliance.APS.Core.Helpers
             return SerializedJSONToken;
         }
 
-        private static string ExtractAuthToken(HttpRequest request)
+        private string ExtractAuthToken(HttpRequest request)
         {
             string Token = null;
             try
@@ -123,7 +148,7 @@ namespace FenixAlliance.APS.Core.Helpers
             return Token;
         }
 
-        public static string ExtractAuthType(HttpRequest Request)
+        public string ExtractAuthType(HttpRequest Request)
         {
             try
             {

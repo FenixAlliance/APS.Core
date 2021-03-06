@@ -1,7 +1,8 @@
 ﻿using FenixAlliance.ABM.Data;
 using FenixAlliance.ABM.Data.Interfaces.Helpers;
+using FenixAlliance.ABM.Models.DTOs.Auth.AAD;
 using FenixAlliance.ACL.Configuration.Interfaces;
-using FenixAlliance.APS.Core.Models;
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
@@ -20,12 +21,12 @@ namespace FenixAlliance.APS.Core.Helpers
         private readonly IConfiguration Configuration;
 
 
-        public AccountGraphHelpers(ABMContext context, IConfiguration configuration, ISuiteOptions SuiteOptions, IWebHostEnvironment Environment)
+        public AccountGraphHelpers(ABMContext context, IConfiguration configuration, ISuiteOptions SuiteOptions, IWebHostEnvironment Environment, AccountUsersHelpers AccountUsersHelpers)
         {
             DataContext = context;
             Configuration = configuration;
             this.SuiteOptions = SuiteOptions;
-            AccountTools = new AccountUsersHelpers(context);
+            AccountTools = AccountUsersHelpers;
         }
 
         public IAADB2CGraphHelpers GetB2CGraphClient()

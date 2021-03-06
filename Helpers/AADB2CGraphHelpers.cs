@@ -1,5 +1,5 @@
 ﻿using FenixAlliance.ABM.Data.Interfaces.Helpers;
-using FenixAlliance.APS.Core.Models;
+using FenixAlliance.ABM.Models.DTOs.Auth.AAD;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Newtonsoft.Json;
 using System;

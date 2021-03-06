@@ -1,6 +1,6 @@
 ﻿using FenixAlliance.ABM.Data;
+using FenixAlliance.ABM.Data.Interfaces.Auth;
 using FenixAlliance.ACL.Configuration.Interfaces;
-using FenixAlliance.APS.Core.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using SendGrid;
@@ -11,12 +11,10 @@ namespace FenixAlliance.APS.Core.Helpers
 {
     public class EmailHelpers : ISmtpService
     {
-        private IConfiguration Configuration { get; set; }
-        private ISuiteOptions SuiteOptions { get; set; }
-        private IWebHostEnvironment Environment { get; set; }
         private ABMContext DataContext { get; set; }
-
-
+        private ISuiteOptions SuiteOptions { get; set; }
+        private IConfiguration Configuration { get; set; }
+        private IWebHostEnvironment Environment { get; set; }
 
         public EmailHelpers(IConfiguration Configuration, ISuiteOptions SuiteOptions, IWebHostEnvironment Environment, ABMContext DataContext)
         {

@@ -1,10 +1,10 @@
 ﻿using FenixAlliance.ABM.Data;
+using FenixAlliance.ABM.Data.Interfaces.Auth;
 using FenixAlliance.ABM.Hub.Extensions;
 using FenixAlliance.ACL.Configuration.Enums;
 using FenixAlliance.ACL.Configuration.Interfaces;
 using FenixAlliance.ACL.Configuration.Types;
 using FenixAlliance.APS.Core.Helpers;
-using FenixAlliance.APS.Core.Interfaces;
 using FenixAlliance.APS.Core.Services.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.AzureAD.UI;
@@ -113,7 +113,7 @@ namespace FenixAlliance.APS.Core.Extensions
                     services.AddAuthentication("Bearer")
                         .AddJwtBearer("Bearer", options =>
                             {
-                                options = Options?.APS?.IdentityServer4.JwtBearerOptions ?? new JwtBearerOptions();
+                                // TODO: Add Bearer Token Options to SuiteOptions as standalone DTO 'cause of serialization issue.
                             });
 
 
@@ -176,26 +176,31 @@ namespace FenixAlliance.APS.Core.Extensions
                                 //.AddCertificate();
                                 .AddCookie();
 
-                            services.AddAuthorization();
+
+                            services.AddScoped<AADB2CGraphHelpers>(); // Not yet ready to be a Service.
+
+
                         }
                     }
                 }
 
                 // Adding authorization service
-                services.AddScoped<AccountUsersHelpers>();
-                services.AddScoped<AccountGraphHelpers>();
-                services.AddScoped<AccountOAuthHelpers>();
-                // services.AddScoped<AADB2CGraphHelpers>(); // Not yet ready to be a Service.
+                services.AddTransient<AccountUsersHelpers>();
+                services.AddTransient<AccountGraphHelpers>();
+                services.AddTransient<AccountOAuthHelpers>();
+                services.AddTransient<ApiAuthorizationHelpers>();
+
+                // Adds: Authorization Service
+                services.AddAuthorization();
+
+                services.AddTransient<IAuthorizationService, AuthorizationService>();
 
                 // Adding SMTP Client Service
-                services.AddSingleton<ISmtpService, EmailHelpers>();
+                services.AddTransient<ISmtpService, EmailHelpers>();
 
                 // Adds DnsClient.
-                services.AddSingleton<IDnsHelperService, DnsHelperService>();
+                services.AddTransient<IDnsHelperService, DnsHelperService>();
 
-
-                services.AddTransient<AuthenticationService>();
-                services.AddTransient<IAuthorizationService, AuthorizationService>();
 
             }
             #endregion

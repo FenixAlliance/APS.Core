@@ -1,15 +1,18 @@
 ﻿using FenixAlliance.ABM.Data;
 using FenixAlliance.ABM.Data.Interfaces.Helpers;
-using FenixAlliance.ABM.Models.DTOs.Authorization;
+using FenixAlliance.ABM.Models.DTOs.Auth;
 using FenixAlliance.ABM.Models.DTOs.Components.Global.Currencies;
 using FenixAlliance.ABM.Models.DTOs.Components.Tenants;
 using FenixAlliance.ABM.Models.DTOs.Responses;
 using FenixAlliance.ABM.Models.Holders;
 using FenixAlliance.ABM.Models.Tenants;
 using FenixAlliance.ABM.SDK.Helpers;
+using FenixAlliance.ACL.Configuration.Interfaces;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -24,7 +27,26 @@ namespace FenixAlliance.APS.Core.Helpers
 {
     public class ApiAuthorizationHelpers : IApiAuthorizationHelpers
     {
-        public static async Task<APIResponse> BindAPIBaseResponse(ABMContext _context, HttpContext _httpContext, HttpRequest _request, AccountUsersHelpers AccountTools, ClaimsPrincipal _user, string TenantID = "", List<string> RequiredPermissions = null, List<string> RequiredRoles = null, bool EnforceBusinessResponse = false)
+        public ISuiteOptions SuiteOptions { get; set; }
+        public IConfiguration Configuration { get; set; }
+        public IWebHostEnvironment Environment { get; set; }
+
+        public ABMContext DataContext { get; set; }
+        public AccountOAuthHelpers AccountOAuthHelpers { get; set; }
+
+
+        public ApiAuthorizationHelpers(ISuiteOptions SuiteOptions , IConfiguration Configuration,
+            IWebHostEnvironment Environment, ABMContext DataContext, AccountOAuthHelpers AccountOAuthHelpers)
+        {
+            this.Environment = Environment;
+            this.DataContext = DataContext;
+            this.SuiteOptions = SuiteOptions;
+            this.Configuration = Configuration;
+            this.AccountOAuthHelpers = AccountOAuthHelpers;
+        }
+
+
+        public async Task<APIResponse> BindAPIBaseResponse(ABMContext _context, HttpContext _httpContext, HttpRequest _request, AccountUsersHelpers AccountTools, ClaimsPrincipal _user, string TenantID = "", List<string> RequiredPermissions = null, List<string> RequiredRoles = null, bool EnforceBusinessResponse = false)
         {
             Business Business = null;
             AccountHolder AccountHolder;
@@ -184,26 +206,40 @@ namespace FenixAlliance.APS.Core.Helpers
                         .Include(c => c.SocialProfile)
                         .Include(c => c.AccountHolderWallet)
                         .Include(c => c.BusinessProfileRecords)
-                        .Include(c => c.AccountHolderCart).ThenInclude(c => c.Currency).ThenInclude(c => c.Country)
+                        .Include(c => c.AccountHolderCart)
+                            .ThenInclude(c => c.Currency)
+                                .ThenInclude(c => c.Country)
                         // Partner Profile
                         .Include(c => c.PersonaPartnerProfile)
-                        .Include(c => c.SocialProfile).ThenInclude(c => c.Followers)
-                        .Include(c => c.SocialProfile).ThenInclude(c => c.Follows)
+                        .Include(c => c.SocialProfile)
+                            .ThenInclude(c => c.Followers)
+                        .Include(c => c.SocialProfile)
+                            .ThenInclude(c => c.Follows)
                         // Add Business I Work for
                         .Include(c => c.BusinessProfileRecords)
                         // Add Current Business Info
-                        .Include(c => c.SelectedBusiness).ThenInclude(c => c.Country)
-                        .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessIndustry)
-                        .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessSegment)
-                        .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessWallet)
-                        .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessProfileRecords)
-                        .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessCart).ThenInclude(c => c.Currency).ThenInclude(c => c.Country)
+                        .Include(c => c.SelectedBusiness)
+                            .ThenInclude(c => c.Country)
+                        .Include(c => c.SelectedBusiness)
+                            .ThenInclude(c => c.BusinessIndustry)
+                        .Include(c => c.SelectedBusiness)
+                            .ThenInclude(c => c.BusinessSegment)
+                        .Include(c => c.SelectedBusiness)
+                            .ThenInclude(c => c.BusinessWallet)
+                        .Include(c => c.SelectedBusiness)
+                            .ThenInclude(c => c.BusinessProfileRecords)
+                        .Include(c => c.SelectedBusiness)
+                            .ThenInclude(c => c.BusinessCart).ThenInclude(c => c.Currency).ThenInclude(c => c.Country)
                         // Partner Profiles
-                        .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessPartnerProfile)
-                        .Include(c => c.SelectedBusiness).ThenInclude(c => c.StartupsPartnerProfile)
+                        .Include(c => c.SelectedBusiness)
+                            .ThenInclude(c => c.BusinessPartnerProfile)
+                        .Include(c => c.SelectedBusiness)
+                            .ThenInclude(c => c.StartupsPartnerProfile)
                         // Add Current Business
-                        .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessSocialProfile).ThenInclude(c => c.Follows)
-                        .Include(c => c.SelectedBusiness).ThenInclude(c => c.BusinessSocialProfile).ThenInclude(c => c.Followers)
+                        .Include(c => c.SelectedBusiness)
+                            .ThenInclude(c => c.BusinessSocialProfile).ThenInclude(c => c.Follows)
+                        .Include(c => c.SelectedBusiness)
+                            .ThenInclude(c => c.BusinessSocialProfile).ThenInclude(c => c.Followers)
                 .FirstOrDefaultAsync(c => c.ID == HolderID);
 
                 if (String.IsNullOrEmpty(TenantID))
@@ -219,11 +255,15 @@ namespace FenixAlliance.APS.Core.Helpers
                       .Include(c => c.BusinessSocialProfile)
                       .Include(c => c.BusinessWallet)
                       .Include(c => c.BusinessProfileRecords)
-                      .Include(c => c.BusinessCart).ThenInclude(c => c.Currency).ThenInclude(c => c.Country)
+                      .Include(c => c.BusinessCart)
+                        .ThenInclude(c => c.Currency)
+                            .ThenInclude(c => c.Country)
                       // Partner Profile
                       .Include(c => c.BusinessPartnerProfile)
-                      .Include(c => c.BusinessSocialProfile).ThenInclude(c => c.Followers)
-                      .Include(c => c.BusinessSocialProfile).ThenInclude(c => c.Follows)
+                      .Include(c => c.BusinessSocialProfile)
+                        .ThenInclude(c => c.Followers)
+                      .Include(c => c.BusinessSocialProfile)
+                        .ThenInclude(c => c.Follows)
                       // Add Business I Work for
                       .Include(c => c.BusinessProfileRecords)
                       // Add Current Business Info
@@ -232,13 +272,17 @@ namespace FenixAlliance.APS.Core.Helpers
                       .Include(c => c.BusinessSegment)
                       .Include(c => c.BusinessWallet)
                       .Include(c => c.BusinessProfileRecords)
-                      .Include(c => c.BusinessCart).ThenInclude(c => c.Currency).ThenInclude(c => c.Country)
+                      .Include(c => c.BusinessCart)
+                        .ThenInclude(c => c.Currency)
+                            .ThenInclude(c => c.Country)
                       // Partner Profiles
                       .Include(c => c.BusinessPartnerProfile)
                       .Include(c => c.StartupsPartnerProfile)
                       // Add Current Business
-                      .Include(c => c.BusinessSocialProfile).ThenInclude(c => c.Follows)
-                      .Include(c => c.BusinessSocialProfile).ThenInclude(c => c.Followers)
+                      .Include(c => c.BusinessSocialProfile)
+                        .ThenInclude(c => c.Follows)
+                      .Include(c => c.BusinessSocialProfile)
+                        .ThenInclude(c => c.Followers)
                     .FirstOrDefaultAsync(c => c.ID == TenantID);
                 }
 

@@ -1,4 +1,5 @@
-﻿using FenixAlliance.APS.Core.Models;
+﻿
+using FenixAlliance.ABM.Models.DTOs.Auth.AADB2C;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;

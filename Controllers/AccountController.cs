@@ -2,7 +2,6 @@
 using FenixAlliance.ABM.Data.Access.Clients;
 using FenixAlliance.ABM.Data.Access.Helpers;
 using FenixAlliance.APS.Core.Helpers;
-using FenixAlliance.APS.Core.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -25,28 +24,29 @@ namespace FenixAlliance.APS.Core.Controllers
     {
         public ABMContext DataContext { get; }
         public StoreHelpers StoreHelpers { get; }
-        public AADB2COptions AADB2COptions { get; }
         public IConfiguration Configuration { get; }
+        public IHostEnvironment Environment { get; }
         public TenantHelpers TenantHelpers { get; }
-        public IHostEnvironment HostEnvironment { get; }
         public AccountUsersHelpers AccountUsersHelpers { get; }
         public AccountGraphHelpers AccountGraphHelpers { get; }
         public TenantDataAccessClient BusinessDataAccess { get; }
-        public BlobStorageDataAccessClient StorageDataAccessClient { get; }
+        public ApiAuthorizationHelpers ApiAuthorizationHelpers { get; }
 
-        public AccountController(IOptions<AADB2COptions> b2cOptions, ABMContext context, IConfiguration configuration, IHostEnvironment hostingEnvironment)
+        public AccountController(ABMContext context, IConfiguration Configuration, IHostEnvironment Environment,
+            StoreHelpers StoreHelpers, TenantHelpers TenantHelpers, AccountUsersHelpers AccountUsersHelpers,
+            AccountGraphHelpers AccountGraphHelpers, TenantDataAccessClient TenantDataAccessClient, ApiAuthorizationHelpers ApiAuthorizationHelpers)
         {
-            DataContext = context;
-            AADB2COptions = b2cOptions.Value;
-            Configuration = configuration;
-            HostEnvironment = hostingEnvironment;
-            StoreHelpers = new StoreHelpers(DataContext);
-            TenantHelpers = new TenantHelpers(context);
-            AccountUsersHelpers = new AccountUsersHelpers(context);
-            AccountGraphHelpers = new AccountGraphHelpers(DataContext, Configuration);
-            BusinessDataAccess = new TenantDataAccessClient(DataContext, Configuration, HostEnvironment);
-            StorageDataAccessClient = new BlobStorageDataAccessClient();
+            this.DataContext = context;
+            this.Environment = Environment;
+            this.StoreHelpers = StoreHelpers;
+            this.TenantHelpers = TenantHelpers;
+            this.Configuration = Configuration;
+            this.AccountUsersHelpers = AccountUsersHelpers;
+            this.AccountGraphHelpers = AccountGraphHelpers;
+            this.BusinessDataAccess = TenantDataAccessClient;
+            this.ApiAuthorizationHelpers = ApiAuthorizationHelpers;
         }
+
 
         [HttpGet]
         public IActionResult SignIn()
@@ -63,18 +63,19 @@ namespace FenixAlliance.APS.Core.Controllers
         }
 
         [HttpGet]
-        public IActionResult ResetPassword()
+        public IActionResult ResetPassword(string PolicyAuthenticationProperty, string ResetPasswordPolicyId)
         {
             var properties = new AuthenticationProperties { RedirectUri = "/" };
-            properties.Items[AADB2COptions.PolicyAuthenticationProperty] = AADB2COptions.ResetPasswordPolicyId;
+            properties.Items[PolicyAuthenticationProperty] = ResetPasswordPolicyId;
             return Challenge(properties, OpenIdConnectDefaults.AuthenticationScheme);
         }
 
         [HttpGet]
-        public IActionResult EditProfile()
+        public IActionResult EditProfile(string PolicyAuthenticationProperty, string EditProfilePolicyId)
         {
             var properties = new AuthenticationProperties { RedirectUri = "/" };
-            properties.Items[AADB2COptions.PolicyAuthenticationProperty] = AADB2COptions.EditProfilePolicyId;
+
+            properties.Items[PolicyAuthenticationProperty] = EditProfilePolicyId;
             return Challenge(properties, OpenIdConnectDefaults.AuthenticationScheme);
         }
 

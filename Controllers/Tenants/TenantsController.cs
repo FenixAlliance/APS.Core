@@ -30,26 +30,28 @@ namespace FenixAlliance.APS.Core.Controllers.Tenants
         public ABMContext DataContext { get; }
         public StoreHelpers StoreHelpers { get; }
         public IConfiguration Configuration { get; }
-        public IHostEnvironment HostEnvironment { get; }
+        public IHostEnvironment Environment { get; }
         public TenantHelpers TenantHelpers { get; }
         public AccountUsersHelpers AccountUsersHelpers { get; }
         public AccountGraphHelpers AccountGraphHelpers { get; }
         public TenantDataAccessClient BusinessDataAccess { get; }
-        public BlobStorageDataAccessClient StorageDataAccessClient { get; }
+        public ApiAuthorizationHelpers ApiAuthorizationHelpers { get; }
 
-        public TenantsController(ABMContext context, IConfiguration configuration, IHostEnvironment hostingEnvironment)
+        public TenantsController(ABMContext context, IConfiguration Configuration, IHostEnvironment Environment,
+            StoreHelpers StoreHelpers, TenantHelpers TenantHelpers, AccountUsersHelpers AccountUsersHelpers,
+            AccountGraphHelpers AccountGraphHelpers, TenantDataAccessClient TenantDataAccessClient, ApiAuthorizationHelpers ApiAuthorizationHelpers)
         {
-            DataContext = context;
-            Configuration = configuration;
-            HostEnvironment = hostingEnvironment;
-            StoreHelpers = new StoreHelpers(DataContext);
-            TenantHelpers = new TenantHelpers(context);
-            AccountUsersHelpers = new AccountUsersHelpers(context);
-            AccountGraphHelpers = new AccountGraphHelpers(DataContext, Configuration);
-            BusinessDataAccess = new TenantDataAccessClient(DataContext, Configuration, HostEnvironment);
-            StorageDataAccessClient = new BlobStorageDataAccessClient();
-
+            this.DataContext = context;
+            this.Environment = Environment;
+            this.StoreHelpers = StoreHelpers;
+            this.TenantHelpers = TenantHelpers;
+            this.Configuration = Configuration;
+            this.AccountUsersHelpers = AccountUsersHelpers;
+            this.AccountGraphHelpers = AccountGraphHelpers;
+            this.BusinessDataAccess = TenantDataAccessClient;
+            this.ApiAuthorizationHelpers = ApiAuthorizationHelpers;
         }
+
 
         [HttpGet("Current")]
         [Produces("application/json")]

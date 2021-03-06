@@ -1,6 +1,6 @@
 ﻿using FenixAlliance.ABM.Data;
+using FenixAlliance.ABM.Data.Interfaces.Auth;
 using FenixAlliance.ACL.Configuration.Interfaces;
-using FenixAlliance.APS.Core.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -130,8 +130,7 @@ namespace FenixAlliance.APS.Core.Helpers
         public async Task DoDnsLookup(string Domain)
         {
             var TxtRecords = GetTxtRecords(Domain);
-
-
+            // ToDo: Implement DNS Lookup
         }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]

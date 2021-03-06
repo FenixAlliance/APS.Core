@@ -1,7 +1,7 @@
 ﻿using FenixAlliance.ABM.Data;
-using FenixAlliance.ABM.Models.DTOs.Authorization;
+using FenixAlliance.ABM.Data.Interfaces.Auth;
+using FenixAlliance.ABM.Models.DTOs.Auth;
 using FenixAlliance.ACL.Configuration.Interfaces;
-using FenixAlliance.APS.Core.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using System;
