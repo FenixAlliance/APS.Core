@@ -1,15 +1,12 @@
 ﻿using FenixAlliance.ABM.Data;
-using FenixAlliance.ABM.Data.Interfaces.Auth;
+using FenixAlliance.ABM.Data.Access.Helpers;
 using FenixAlliance.ABM.Hub.Extensions;
 using FenixAlliance.ACL.Configuration.Enums;
 using FenixAlliance.ACL.Configuration.Interfaces;
 using FenixAlliance.ACL.Configuration.Types;
-using FenixAlliance.APS.Core.Helpers;
-using FenixAlliance.APS.Core.Services.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.AzureAD.UI;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -184,23 +181,9 @@ namespace FenixAlliance.APS.Core.Extensions
                     }
                 }
 
-                // Adding authorization service
-                services.AddTransient<AccountUsersHelpers>();
-                services.AddTransient<AccountGraphHelpers>();
-                services.AddTransient<AccountOAuthHelpers>();
-                services.AddTransient<ApiAuthorizationHelpers>();
 
                 // Adds: Authorization Service
                 services.AddAuthorization();
-
-                services.AddTransient<IAuthorizationService, AuthorizationService>();
-
-                // Adding SMTP Client Service
-                services.AddTransient<ISmtpService, EmailHelpers>();
-
-                // Adds DnsClient.
-                services.AddTransient<IDnsHelperService, DnsHelperService>();
-
 
             }
             #endregion

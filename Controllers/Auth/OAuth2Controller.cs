@@ -1,12 +1,10 @@
 ﻿using FenixAlliance.ABM.Data;
-using FenixAlliance.ABM.Data.Access.Clients;
-using FenixAlliance.ABM.Data.Access.Helpers;
+using FenixAlliance.ABM.Data.Interfaces.Services;
 using FenixAlliance.ABM.Models.DTOs.Auth;
 using FenixAlliance.ABM.Models.DTOs.Responses;
 using FenixAlliance.ABM.Models.Global.Integrations.Applications;
 using FenixAlliance.ABM.Models.Tenants.BusinessProfileRecords;
 using FenixAlliance.ABM.SDK.Helpers;
-using FenixAlliance.APS.Core.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
@@ -29,29 +27,26 @@ namespace FenixAlliance.APS.Core.Controllers.Auth
     [Consumes("application/json", "application/xml")]
     public class OAuth2Controller : ControllerBase
     {
-        public ABMContext DataContext { get; }
-        public StoreHelpers StoreHelpers { get; }
-        public IConfiguration Configuration { get; }
-        public IHostEnvironment Environment { get; }
-        public TenantHelpers TenantHelpers { get; }
-        public AccountUsersHelpers AccountUsersHelpers { get; }
-        public AccountGraphHelpers AccountGraphHelpers { get; }
-        public TenantDataAccessClient BusinessDataAccess { get; }
-        public ApiAuthorizationHelpers ApiAuthorizationHelpers { get; }
+        public ABMContext DataContext { get; set; }
+        public IAuthService AuthService { get; set; }
+        public IStoreService StoreHelpers { get; set; }
+        public IConfiguration Configuration { get; set; }
+        public IHostEnvironment Environment { get; set; }
+        public IHolderService HolderService { get; set; }
+        public ITenantService TenantService { get; set; }
+        public IStorageService StorageService { get; set; }
 
-        public OAuth2Controller(ABMContext context, IConfiguration Configuration, IHostEnvironment Environment,
-            StoreHelpers StoreHelpers, TenantHelpers TenantHelpers, AccountUsersHelpers AccountUsersHelpers,
-            AccountGraphHelpers AccountGraphHelpers, TenantDataAccessClient TenantDataAccessClient, ApiAuthorizationHelpers ApiAuthorizationHelpers)
+        public OAuth2Controller(ABMContext DataContext, IConfiguration Configuration, IHostEnvironment Environment,
+            IStoreService StoreHelpers, ITenantService TenantService, IHolderService HolderService, IAuthService AuthService, IStorageService StorageService)
         {
-            this.DataContext = context;
+            this.AuthService = AuthService;
+            this.DataContext = DataContext;
             this.Environment = Environment;
             this.StoreHelpers = StoreHelpers;
-            this.TenantHelpers = TenantHelpers;
             this.Configuration = Configuration;
-            this.AccountUsersHelpers = AccountUsersHelpers;
-            this.AccountGraphHelpers = AccountGraphHelpers;
-            this.BusinessDataAccess = TenantDataAccessClient;
-            this.ApiAuthorizationHelpers = ApiAuthorizationHelpers;
+            this.HolderService = HolderService;
+            this.TenantService = TenantService;
+            this.StorageService = StorageService;
         }
 
 
@@ -260,7 +255,7 @@ namespace FenixAlliance.APS.Core.Controllers.Auth
         [Produces("application/json")]
         public async Task<ActionResult> Get(string TenantID)
         {
-            var APIResponse = JsonSerializer.Deserialize<APIResponse>(JsonSerializer.Serialize(await ApiAuthorizationHelpers.BindAPIBaseResponse(DataContext, HttpContext, Request, AccountUsersHelpers, User, TenantID)));
+            var APIResponse = JsonSerializer.Deserialize<APIResponse>(JsonSerializer.Serialize(await AuthService.BindAPIBaseResponse(DataContext, HttpContext, Request, HolderService, User, TenantID)));
             if (APIResponse == null || !APIResponse.Status.Success || APIResponse.Holder == null || APIResponse.Tenant == null)
             {
                 return Unauthorized(APIResponse?.Status);

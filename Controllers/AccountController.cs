@@ -1,14 +1,11 @@
 ﻿using FenixAlliance.ABM.Data;
-using FenixAlliance.ABM.Data.Access.Clients;
-using FenixAlliance.ABM.Data.Access.Helpers;
-using FenixAlliance.APS.Core.Helpers;
+using FenixAlliance.ABM.Data.Interfaces.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 
 /* Fenix Alliance Main Web Portal
  * @Author: Daniel Lozano Navas
@@ -22,29 +19,26 @@ namespace FenixAlliance.APS.Core.Controllers
     [ApiExplorerSettings(IgnoreApi = true)]
     public class AccountController : Controller
     {
-        public ABMContext DataContext { get; }
-        public StoreHelpers StoreHelpers { get; }
-        public IConfiguration Configuration { get; }
-        public IHostEnvironment Environment { get; }
-        public TenantHelpers TenantHelpers { get; }
-        public AccountUsersHelpers AccountUsersHelpers { get; }
-        public AccountGraphHelpers AccountGraphHelpers { get; }
-        public TenantDataAccessClient BusinessDataAccess { get; }
-        public ApiAuthorizationHelpers ApiAuthorizationHelpers { get; }
+        public ABMContext DataContext { get; set; }
+        public IAuthService AuthService { get; set; }
+        public IStoreService StoreHelpers { get; set; }
+        public IConfiguration Configuration { get; set; }
+        public IHostEnvironment Environment { get; set; }
+        public IHolderService HolderService { get; set; }
+        public ITenantService TenantService { get; set; }
+        public IStorageService StorageService { get; set; }
 
-        public AccountController(ABMContext context, IConfiguration Configuration, IHostEnvironment Environment,
-            StoreHelpers StoreHelpers, TenantHelpers TenantHelpers, AccountUsersHelpers AccountUsersHelpers,
-            AccountGraphHelpers AccountGraphHelpers, TenantDataAccessClient TenantDataAccessClient, ApiAuthorizationHelpers ApiAuthorizationHelpers)
+        public AccountController(ABMContext DataContext, IConfiguration Configuration, IHostEnvironment Environment,
+            IStoreService StoreHelpers, ITenantService TenantService, IHolderService HolderService, IAuthService AuthService, IStorageService StorageService)
         {
-            this.DataContext = context;
+            this.AuthService = AuthService;
+            this.DataContext = DataContext;
             this.Environment = Environment;
             this.StoreHelpers = StoreHelpers;
-            this.TenantHelpers = TenantHelpers;
             this.Configuration = Configuration;
-            this.AccountUsersHelpers = AccountUsersHelpers;
-            this.AccountGraphHelpers = AccountGraphHelpers;
-            this.BusinessDataAccess = TenantDataAccessClient;
-            this.ApiAuthorizationHelpers = ApiAuthorizationHelpers;
+            this.HolderService = HolderService;
+            this.TenantService = TenantService;
+            this.StorageService = StorageService;
         }
 
 
